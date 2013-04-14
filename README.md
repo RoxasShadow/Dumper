@@ -1,6 +1,6 @@
 Dumper
 ======
-Image dumper with profiles. Supports 4chan, mangaeden, multiplayer, wallpaperhere, etc.
+Image dumper with profiles. Supports 4chan, mangaeden, multiplayer, wallpaperhere, sankakucomplex and fakku.
 
 
 Just nokogiri (`[sudo|rvm] gem install nokogiri`) is required.

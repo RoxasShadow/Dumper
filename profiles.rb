@@ -27,7 +27,7 @@ module Dumper; module Profiles
   ### Helpers ###
   
   def self.list
-    [ '4chan', 'multiplayer', 'wallpaperhere', 'videogamegirlsdb', 'imagebam', 'mi9', 'oppaisan', 'redblow', 'behoimi', 'sankakucomplex', 'mangaeden', 'fakku' ]
+    [ '4chan', 'multiplayer', 'wallpaperhere', 'sankakucomplex', 'mangaeden', 'fakku' ]
   end
   
   def self.get(path, p, ua = '', ref = '', filename = '')
@@ -114,70 +114,6 @@ module Dumper; module Profiles
         Nokogiri::HTML(open('http://www.wallpaperhere.com' + p + '/download_' + size)).xpath('//div[@class="download_img"]/div/img/@src').each { |q|
           self.get path, 'http://www.wallpaperhere.com' + q.to_s
         }
-      }
-    }
-  end
-  
-  def self.get_videogamegirlsdb(url, path, pages)
-    Nokogiri::HTML(open(url)).xpath('//a/@href').each { |p|
-      next unless p.to_s.start_with? 'GameGirlImage.aspx?ImageId='
-      
-      img = Nokogiri::HTML(open('http://www.videogamegirlsdb.com/Girls/' + p.to_s + '&Size=Full'))
-      img = img.xpath('//img[@id="ctl00_ctl00_ContentPlaceHolderMain_ContentPlaceHolderMain_ImageDataList_ctl00_ImageDisplay"]/@src')[0].to_s
-      self.get path, 'http://www.videogamegirlsdb.com/' + img[3..-1]
-    }
-  end
-  
-  def self.get_imagebam(url, path, pages)
-    Nokogiri::HTML(open(url)).xpath('//a[@style="border:none; margin:2px;"]/@href').each { |p|
-      next unless p.to_s.start_with? 'http://www.imagebam.com/image/'
-      
-      Nokogiri::HTML(open(p)).xpath('//img[@onclick="scale(this);"]/@src').each { |u|
-        self.get path, u
-      }
-    }
-  end
-  
-  # Pages to download available
-  def self.get_mi9(url, path, pages)
-    url = url[0..-2] if url.end_with? ?/
-    1.upto(pages) { |page|
-      u = url + ( page == 1 ? ?/ : "_#{page}/" )
-      Nokogiri::HTML(open(u)).xpath('//a[@target="_blank"]/@href').each { |p|
-        next unless p.to_s.start_with? 'http://mi9.com/wallpaper/'
-        Nokogiri::HTML(open(p.to_s)).xpath('//div[@class="s_infox down"]/span/a/@href').each { |q|
-          Nokogiri::HTML(open(q.to_s)).xpath('//div[@class="dimg"]/a/img/@src').each { |r|
-            self.get path, r
-          }
-        }
-      }
-    }
-  end
-  
-  def self.get_oppaisan(url, path, pages)
-    Nokogiri::HTML(open(url)).xpath('//img[@border="0"]/@src').each { |p|
-      p = p.to_s
-      next unless p.start_with?(?/) && p.end_with?('.jpg')
-      self.get path, 'http://oppaisan.com' + p
-    }
-  end
-  
-  def self.get_redblow(url, path, pages)
-    ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-    ref = url
-    Nokogiri::HTML(open(url)).xpath('//img[@class="attachment-medium"]/@src').each { |p|
-      self.get path, p, ua, ref
-    }
-  end
-  
-  # Pages to download available
-  def self.get_behoimi(url, path, pages)
-    ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-    ref = url
-    1.upto(pages) { |page|
-      u = url + "&page=#{page}"
-      Nokogiri::HTML(open(u, 'User-Agent' => ua, 'Referer' => ref)).xpath('//img[@class="preview    "]/@src').each { |p|
-        self.get path, p.to_s.gsub('preview/', ''), ua, ref
       }
     }
   end
