@@ -167,12 +167,13 @@ module Dumper; module Profiles
       dir = File.join path, "#{p.children[1].text} - #{p.children[3].text.sanitize_filename}"
       Dir.mkdir(dir) unless File.directory? dir
       
-      Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}")).xpath('//img[@id="mainImg"]/@src').each { |r|
+      page = Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}"))
+      nokogiri.xpath('//img[@id="mainImg"]/@src').each { |r|
         self.get dir, r, '', '', "1.png"
         i += 1
       }
       
-      Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}")).xpath('//a[@class="ui-state-default"]').each { |q|
+      nokogiri.xpath('//a[@class="ui-state-default"]').each { |q|
         next unless q.text.numeric?        
         q = q['href']
                   
