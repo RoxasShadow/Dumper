@@ -27,7 +27,7 @@ module Dumper; module Profiles
   ### Helpers ###
   
   def self.list
-    [ '4chan', 'multiplayer', 'wallpaperhere', 'videogamegirlsdb', 'imagebam', 'mi9', 'oppaisan', 'redblow', 'behoimi', 'sankakucomplex', 'mangaeden', 'fakku' ]
+    [ '4chan', 'multiplayer', 'wallpaperhere', 'videogamegirlsdb', 'imagebam', 'sankakucomplex', 'mangaeden', 'fakku' ]
   end
   
   def self.get(path, p, ua = '', ref = '', filename = '')
