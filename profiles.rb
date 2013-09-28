@@ -168,12 +168,13 @@ module Dumper; module Profiles
       Dir.mkdir(dir) unless File.directory? dir
       
       page = Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}"))
-      nokogiri.xpath('//img[@id="mainImg"]/@src').each { |r|
+
+      page.xpath('//img[@id="mainImg"]/@src').each { |r|
         self.get dir, r, '', '', "1.png"
         i += 1
       }
       
-      nokogiri.xpath('//a[@class="ui-state-default"]').each { |q|
+      page.xpath('//a[@class="ui-state-default"]').each { |q|
         next unless q.text.numeric?        
         q = q['href']
                   
@@ -207,7 +208,7 @@ module Dumper; module Profiles
   end
   
   def self.get_deviantart(url, path, pages)
-    Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]/@data-super-full-img').each { |u|
+    Nokogiri::HTML(open(url)).xpath('//div[@class="zones-container"]')[0].xpath('.//a[@class="thumb"]/@data-super-full-img').each { |u|
       self.get path, u
     }
   end
