@@ -27,7 +27,7 @@ module Dumper; module Profiles
   ### Helpers ###
   
   def self.list
-    [ '4chan', 'multiplayer', 'wallpaperhere', 'imagebam', 'sankakucomplex', 'mangaeden', 'fakku' ]
+    [ '4chan', 'multiplayer', 'wallpaperhere', 'imagebam', 'sankakucomplex', 'mangaeden', 'fakku', 'deviantart' ]
   end
   
   def self.get(path, p, ua = '', ref = '', filename = '')
@@ -204,6 +204,12 @@ module Dumper; module Profiles
         File.delete(file) if File.exists? file
       end
     }    
+  end
+  
+  def self.get_deviantart(url, path, pages)
+    Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]/@data-super-full-img').each { |u|
+      self.get path, u
+    }
   end
   
 end; end
