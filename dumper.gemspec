@@ -1,7 +1,7 @@
 Kernel.load 'lib/dumper/version.rb'
 
 Gem::Specification.new { |s|
-  s.name          = 'dumper'
+  s.name          = 'image-dumper'
   s.version       = Dumper::version
   s.author        = 'Giovanni Capuano'
   s.email         = 'webmaster@giovannicapuano.net'

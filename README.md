@@ -7,6 +7,8 @@ I own these profiles for a long time, so I don't know if they still work.
 Also, it's all written to just work, so don't read them for a long time. They can be radioactive.
 
 
+`gem install image-dumper # install the dumper gem`
+
 `dumper -l # list profiles`
 
 `dumper -h # get help`
