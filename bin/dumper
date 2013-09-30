@@ -18,35 +18,9 @@
 # along with Dumper.  If not, see <http://www.gnu.org/licenses/>.
 #++
 
-require './profiles.rb'
-require 'uri'
-require 'optparse'
-
-class String
-
-  def numeric?
-    self.to_i.to_s == self || self.to_f.to_s == self
-  end
-  
-  def sanitize_filename
-    self.split(/(?<=.)\.(?=[^.])(?!.*\.[^.])/m).map { |s| s.gsub /[^a-z0-9\-]+/i, ?_ }.join(?.)
-  end
-  
-end
-
-class NilClass
-  def numeric?
-    false
-  end  
-end
+require 'dumper'
 
 options = {}
-
-if ARGV.empty?  
-  abort 'Profiles available:'.tap { |s|
-    Dumper::Profiles::list.each { |p| s << "\n" + (' ' * 3) + p }
-  }
-end
 
 OptionParser.new do |o|
   options[:url]     = []
@@ -54,8 +28,22 @@ OptionParser.new do |o|
   options[:pages]   = 1
   
   o.on '-l', '--list', 'Show available profiles' do
-    puts Dumper::Profiles::list.join "\n"
-    exit
+    abort 'Profiles available:'.tap { |s|
+      Dumper::Profiles::list.sort { |a, b| a <=> b }.each { |p| s << "\n" + (' ' * 3) + p }
+    } if ARGV.empty?
+  end
+
+  o.on '-i', '--info PROFILE', 'Get info about profiles' do |profile|
+    if Dumper::Profiles::list.include? profile
+      method = ("info_#{profile}").to_sym
+      Dumper::Profiles::send(method).tap { |i|
+        puts "Option 'from' is #{i[:from] ? 'available' : 'not available'}"
+        puts "Option 'to'   is #{i[:to]   ? 'available' : 'not available'}"
+      }
+    else
+      puts 'Profile not found.'
+    end
+    abort
   end
   
   o.on '-u', '--url URL', 'Target URL' do |url|
@@ -79,8 +67,12 @@ OptionParser.new do |o|
     options[:xpath] = xpath
   end
   
-  o.on '-g', '--pages PAGES', 'Pages to save (if allowed)' do |pages|
-    options[:pages] = pages.to_i
+  o.on '-o', '--from PAGE', 'Start to save from... (if allowed)' do |pages|
+    options[:from] = pages.to_i
+  end
+  
+  o.on '-g', '--to PAGE', 'Finish to save at... (if allowed)' do |pages|
+    options[:to] = pages.to_i
   end
 end.parse!
 
@@ -90,24 +82,25 @@ elsif options[:path].empty?
   abort 'Path is required.'
 end
 
-begin      
-  options[:url].each_with_index { |url, i|
-    begin
-      host = URI.parse(url).host.split(?.)[-2]
-      Dir.mkdir(options[:path][i]) unless File.directory? options[:path][i]
-      if Dumper::Profiles::list.include? host
-        method = ('get_' + host.gsub(?-, ?_)).to_sym
-        Dumper::Profiles::send method, url, options[:path][i], options[:pages]
-      else
-        Dumper::Profiles::get_generic  url, options[:path][i], options[:xpath]
-      end
-    rescue Nokogiri::XML::XPath::SyntaxError => e
-      puts e.to_s.gsub(/expression/, 'xpath')
-      puts 'Cannot dump.'
-    rescue OpenURI::HTTPError => e
-      puts "Error opening #{url}: #{e}" 
-    rescue URI::InvalidURIError => e
-      puts "URL #{url} is not valid: #{e}"
+options[:url].each_with_index { |url, i|
+  begin
+
+    host = URI.parse(url).host.split(?.)[-2]
+    Dir.mkdir(options[:path][i]) unless File.directory? options[:path][i]
+    
+    if Dumper::Profiles::list.include? host
+      method = ('get_' + host.gsub(?-, ?_)).to_sym
+      Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
+    else
+      Dumper::Profiles::get_generic  url, options[:path][i], options[:xpath]
     end
-  }
-end
+
+  rescue Nokogiri::XML::XPath::SyntaxError => e
+    puts e.to_s.gsub(/expression/, 'xpath')
+    puts 'Cannot dump.'
+  rescue OpenURI::HTTPError => e
+    puts "Error opening #{url}: #{e}" 
+  rescue URI::InvalidURIError => e
+    puts "URL #{url} is not valid: #{e}"
+  end
+}

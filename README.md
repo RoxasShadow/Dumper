@@ -1,17 +1,16 @@
 Dumper
 ======
-Image dumper with profiles. Supports 4chan, multiplayer, wallpaperhere, imagebam, sankakucomplex, mangaeden, fakku, deviantart and more.
+
+A dumper to download whole galleries from the more popular boards (aka, those I care).
+It's fully modular, so you can add a website just adding its module in lib/dumper/profiles.
+I own these profiles for a long time, so I don't know if they still work.
+Also, it's all written to just work, so don't read them for a long time. They can be radioactive.
 
 
-Just nokogiri (`[sudo|rvm] gem install nokogiri`) is required.
+`dumper -l # list profiles`
 
+`dumper -h # get help`
 
-`dumper -l`
+`dumper -u "http://boards.4chan.org/wg/res/5280736" -p "E:\\vessel" # dumping around the world ♪`
 
-`dumper -h`
-
-`dumper -u "http://boards.4chan.org/wg/res/5280736" -p "C:\\dumping"`
-
-`dumper -u "http://multiplayer.it/immagini/journey-per-ps3/410325/" -g 3 -p "C:\\dumping"`
-
-TODO: Store profiles in a specific folder | Make gem | Show to the world my secret profiles | Make ponies
+`dumper -u "http://www.mi9.com/wallpapers/cool-design-wallpapers_4846/" -o 2 -g 3 -p "E:\\vessel" # dump the pages 2 and 3`
