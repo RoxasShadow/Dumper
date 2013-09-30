@@ -22,9 +22,11 @@ module Dumper
 
     def self.get_mangahere(url, path, from = 1, to = 1)
       Nokogiri::HTML(open(url)).xpath('//div[@class="detail_list"]/ul/li').each { |p|
-        chapter = p.children[1].children[1]['href'].to_s
+        chapter = p.at_xpath('.//span/a/@href').to_s
+        name    = p.at_xpath('.//span/a/text()').to_s.strip
+        next if chapter.strip.empty?
 
-        dir = File.join path, p.children[1].text.sanitize_filename
+        dir = File.join path, name.sanitize_filename
         Dir.mkdir(dir) unless File.directory? dir
 
         option = Nokogiri::HTML(open(chapter)).xpath('//select[@class="wid60"]/option')
