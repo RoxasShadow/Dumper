@@ -24,6 +24,7 @@ require 'optparse'
 require 'net/http'
 require 'base64'
 
+require 'dumper/utils'
 Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
 }
