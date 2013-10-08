@@ -20,20 +20,21 @@
 module Dumper
   module Profiles
 
-    def self.get_gelbooru(url, path, from = 1, to = 1)
-      page = 0
+    def self.get_yande(url, path, from = 1, to = 1)
+      ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+      ref = url
+
       from.upto(to) { |i|
-        Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
-          self.get path, u.child.child['src'].gsub(/thumbnails/, 'images').gsub(/thumbnail_/, '')
+        Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="directlink largeimg"]/@href').each { |u|
+          self.get path, u.to_s, ua, ref
         }
         
-        page += 63
         puts "--- Page #{page} now... ---" # there are so much pages sometimes...
         puts
       }
     end
 
-    def self.info_gelbooru
+    def self.info_yande
       { :from => true, :to => true }
     end
 

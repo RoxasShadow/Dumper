@@ -19,4 +19,5 @@ Gem::Specification.new { |s|
   s.executables = 'dumper'
 
   s.add_runtime_dependency 'nokogiri'
+  s.add_runtime_dependency 'certified'
 }

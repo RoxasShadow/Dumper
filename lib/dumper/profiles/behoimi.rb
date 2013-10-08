@@ -23,9 +23,9 @@ module Dumper
     def self.get_behoimi(url, path, from = 1, to = 1)
       ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
       ref = url
-      from.upto(to) { |page|
-        u = url + "&page=#{page}"
-        Nokogiri::HTML(open(u, 'User-Agent' => ua, 'Referer' => ref)).xpath('//img[@class="preview    "]/@src').each { |p|
+
+      from.upto(to) { |i|
+        Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//img[@class="preview    "]/@src').each { |p|
           self.get path, p.to_s.gsub('preview/', ''), ua, ref
         }
       }

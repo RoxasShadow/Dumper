@@ -18,10 +18,12 @@
 #++
 
 require 'open-uri'
-require 'nokogiri'
 require 'uri'
 require 'optparse'
 require 'net/http'
+require 'nokogiri'
+require 'openssl'
+require 'certified'
 require 'base64'
 
 require 'dumper/utils'

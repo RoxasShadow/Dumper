@@ -25,7 +25,8 @@ options = {}
 OptionParser.new do |o|
   options[:url]     = []
   options[:path]    = []
-  options[:pages]   = 1
+  options[:from]    = 1
+  options[:to]      = 1
   
   o.on '-l', '--list', 'Show available profiles' do
     abort 'Profiles available:'.tap { |s|
