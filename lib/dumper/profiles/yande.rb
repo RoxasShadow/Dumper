@@ -29,7 +29,7 @@ module Dumper
           self.get path, u.to_s, ua, ref
         }
         
-        puts "--- Page #{page} now... ---" # there are so much pages sometimes...
+        puts "--- Page #{i} now... ---" # there are so much pages sometimes...
         puts
       }
     end
