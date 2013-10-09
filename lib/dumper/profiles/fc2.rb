@@ -18,7 +18,17 @@
 #++
 
 module Dumper
-  def self.version
-    '0.5.3.2'
+  module Profiles
+
+    def self.get_fc2(url, path, from = 1, to = 1)
+      Nokogiri::HTML(open(url)).xpath('//img[@class="thumbnail_image"]').each { |p|
+        self.get path, p['src']
+      }
+    end
+
+    def self.info_fc2
+      { :from => false, :to => false }
+    end
+
   end
 end

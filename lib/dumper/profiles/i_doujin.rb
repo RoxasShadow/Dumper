@@ -18,7 +18,21 @@
 #++
 
 module Dumper
-  def self.version
-    '0.5.3.2'
+  module Profiles
+
+    def self.get_i_doujin(url, path, from = 1, to = 1)
+      url = url.scan(/(.*?)\/p\:/).first.first if url.include? '/p:'
+
+      pages = Nokogiri::HTML(open("#{url}/p:1")).xpath('//div[@class="pager-navigation"]').text.split(?/)[1].scan(/\d+/)[0].to_i
+
+      1.upto(pages) { |i|
+        self.get path, Nokogiri::HTML(open("#{url}/p:#{i}")).xpath('//div[@class="doujin-img-view"]/img/@src')[0]
+      }
+    end
+
+    def self.info_i_doujin
+      { :from => false, :to => false }
+    end
+
   end
 end

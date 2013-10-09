@@ -89,7 +89,7 @@ options[:url].each_with_index { |url, i|
     host = URI.parse(url).host.split(?.)[-2]
     Dir.mkdir(options[:path][i]) unless File.directory? options[:path][i]
     
-    if Dumper::Profiles::list.include? host
+    if Dumper::Profiles::list.include? host.gsub(?-, ?_)
       method = ('get_' + host.gsub(?-, ?_)).to_sym
       Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
     else
