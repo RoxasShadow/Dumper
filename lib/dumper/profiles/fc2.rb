@@ -21,8 +21,8 @@ module Dumper
   module Profiles
 
     def self.get_fc2(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//img[@class="thumbnail_image"]').each { |p|
-        self.get path, p['src']
+      Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href').each { |p|
+        self.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
       }
     end
 
