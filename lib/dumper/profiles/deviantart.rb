@@ -21,8 +21,8 @@ module Dumper
   module Profiles
 
     def self.get_deviantart(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//div[@class="zones-container"]')[0].xpath('.//a[@class="thumb"]/@data-super-full-img').each { |u|
-        self.get path, u
+      Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]').each { |u|
+        self.get path, u['data-super-img']
       }
     end
 
