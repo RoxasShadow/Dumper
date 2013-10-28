@@ -45,7 +45,7 @@ module Dumper; module Profiles
         if File.exists? filename
           puts "File #{filename} already exists."
         else
-          filename = File.join path, rand(1000).to_s + '.jpg' unless filename[-4] == ?.
+          filename = File.join path, rand(1000).to_s + '.jpg' unless filename[-4] == ?. || filename[-5] == ?.
           puts "Downloading #{p} as #{filename}..."
           File.open(filename, 'wb') { |f| f.write open(p, 'User-Agent' => ua, 'Referer' => ref).read }
         end
