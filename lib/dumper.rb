@@ -24,7 +24,7 @@ require 'net/http'
 require 'nokogiri'
 require 'openssl'
 require 'certified'
-require 'addressable'
+require 'addressable/uri'
 require 'base64'
 
 require 'dumper/utils'
