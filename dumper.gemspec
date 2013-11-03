@@ -20,4 +20,5 @@ Gem::Specification.new { |s|
 
   s.add_runtime_dependency 'nokogiri'
   s.add_runtime_dependency 'certified'
+  s.add_runtime_dependency 'addressable'
 }
