@@ -16,3 +16,6 @@ Also, it's all written to just work, so don't read them for a long time. They ca
 `dumper -u "http://boards.4chan.org/wg/res/5280736" -p "E:\\vessel" # dumping around the world ♪`
 
 `dumper -u "http://www.mi9.com/wallpapers/cool-design-wallpapers_4846/" -o 2 -g 3 -p "E:\\vessel" # dump the pages 2 and 3`
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/RoxasShadow/dumper/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
