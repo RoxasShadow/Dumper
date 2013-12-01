@@ -24,21 +24,15 @@ module Dumper
       ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
       ref = url
 
-      if url.include? '/pool/show/'
-        Nokogiri::HTML(open(url, 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="thumb"]/@href').each { |p|
+      from.upto(to) { |i|
+        Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="thumb"]/@href').each { |p|
           img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => ref)).at_xpath('//img[@id="image"]/@src').text
           self.get path, img, ua, ref
         }
-      else
-        from.upto(to) { |i|
-          Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="directlink largeimg"]/@href').each { |u|
-            self.get path, u.to_s, ua, ref
-          }
-          
-          puts "--- Page #{i} now... ---" # there are so much pages sometimes...
-          puts
-        }
-      end
+        
+        puts "--- Page #{i} now... ---" # there are so much pages sometimes...
+        puts
+      }
     end
 
     def self.info_yande
