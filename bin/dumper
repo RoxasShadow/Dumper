@@ -23,10 +23,8 @@ require 'dumper'
 options = {}
 
 OptionParser.new do |o|
-  options[:url]     = []
-  options[:path]    = []
-  options[:from]    = nil
-  options[:to]      = nil
+  options[:url]  = []
+  options[:path] = []
   
   o.on '-l', '--list', 'Show available profiles' do
     abort 'Profiles available:'.tap { |s|
@@ -91,7 +89,11 @@ options[:url].each_with_index { |url, i|
     
     if Dumper::Profiles::list.include? host.gsub(?-, ?_)
       method = ('get_' + host.gsub(?-, ?_)).to_sym
-      Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
+      if options.include?(:from) && options.include?(:to)
+        Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
+      else
+        Dumper::Profiles::send method, url, options[:path][i]
+      end
     else
       Dumper::Profiles::get_generic  url, options[:path][i], options[:xpath]
     end

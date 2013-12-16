@@ -21,9 +21,6 @@ module Dumper
   module Profiles
 
     def self.get_fakku(url, path, from = 1, to = 999)
-      puts from
-      puts to
-      abort
       url    += '/read' unless url.end_with? '/read'
       errors = 0
       
