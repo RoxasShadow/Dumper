@@ -18,7 +18,18 @@
 #++
 
 module Dumper
-  def self.version
-    '0.5.5'
+  module Profiles
+
+    def self.get_teca(url, path)
+      url = url.split('index').first
+      Nokogiri::HTML(open(url)).xpath('//a/@href').each { |p|
+        self.get(path, "#{url}/#{p}") if p.to_s =~ /.\.(png|bmp|jpeg|jpg|gif|tiff)$/i
+      }
+    end
+
+    def self.info_teca
+      { :from => false, :to => false }
+    end
+
   end
 end

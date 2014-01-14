@@ -62,6 +62,10 @@ OptionParser.new do |o|
     options[:path] << path
   end
   
+  o.on '-r', '--profile PROFILE', 'Use the given profile' do |profile|
+    options[:profile] = profile
+  end
+  
   o.on '-x', '--xpath XPATH', 'Custom xpath' do |xpath|
     options[:xpath] = xpath
   end
@@ -84,7 +88,7 @@ end
 options[:url].each_with_index { |url, i|
   begin
 
-    host = URI.parse(url).host.split(?.)[-2]
+    host = options.has_key?(:profile) ? options[:profile] : URI.parse(url).host.split(?.)[-2]
     Dir.mkdir(options[:path][i]) unless File.directory? options[:path][i]
     
     if Dumper::Profiles::list.include? host.gsub(?-, ?_)
