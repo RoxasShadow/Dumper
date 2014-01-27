@@ -23,18 +23,20 @@ module Dumper
     def self.get_booru(url, path, from = 1, to = 1)
       page = 0
       from.upto(to) { |i|
+        puts "--- Page #{i} ---"
+
         Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
-          self.get path, u.child.child['src'].gsub(/thumbs/, 'img').gsub(/thumbnails\//, 'images/').gsub(/thumbnail_/, '')
+          Thread.new {
+            self.get path, u.child.child['src'].gsub(/thumbs/, 'img').gsub(/thumbnails\//, 'images/').gsub(/thumbnail_/, '')
+          }.join
         }
         
-        page += 20
-        puts "--- Page #{page} now... ---" # there are so much pages sometimes...
-        puts
+        page += 40
       }
     end
 
     def self.info_booru
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :pages }
     end
 
   end

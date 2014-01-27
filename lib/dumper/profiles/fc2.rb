@@ -20,14 +20,19 @@
 module Dumper
   module Profiles
 
-    def self.get_fc2(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href').each { |p|
-        self.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
+    def self.get_fc2(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+
+      Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href')[from..to].each { |p|
+        Thread.new {
+          self.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
+        }.join
       }
     end
 
     def self.info_fc2
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

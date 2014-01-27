@@ -20,17 +20,21 @@
 module Dumper
   module Profiles
 
-    def self.get_redblow(url, path, from = 1, to = 1)
-      ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-      ref = url
+    def self.get_redblow(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+      ua    = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+      ref   = url
       
-      Nokogiri::HTML(open(url)).xpath('//img[@class="attachment-medium"]/@src').each { |p|
-        self.get path, p, ua, ref
+      Nokogiri::HTML(open(url)).xpath('//img[@class="attachment-medium"]/@src')[from..to].each { |p|
+        Thread.new {
+          self.get path, p, ua, ref
+        }.join
       }
     end
 
     def self.info_redblow
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

@@ -20,15 +20,24 @@
 module Dumper
   module Profiles
 
-    def self.get_teca(url, path)
-      url = url.split('index').first
-      Nokogiri::HTML(open(url)).xpath('//a/@href').each { |p|
-        self.get(path, "#{url}/#{p}") if p.to_s =~ /.\.(png|bmp|jpeg|jpg|gif|tiff)$/i
+    def self.get_teca(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+      url   = url.split('index').first
+
+      [].tap { |urls|
+        Nokogiri::HTML(open(url)).xpath('//a/@href').each { |u|
+          urls << u if u.to_s =~ /.\.(png|bmp|jpeg|jpg|gif|tiff)$/i
+        }
+      }.reverse[from..to].each { |p|
+        Thread.new {
+          self.get path, "#{url}/#{p}"
+        }.join
       }
     end
 
     def self.info_teca
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

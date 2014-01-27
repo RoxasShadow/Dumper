@@ -20,22 +20,24 @@
 module Dumper
   module Profiles
 
-    def self.get_multiplayer(url, path, from = 1, to = 1)
-      url += '?pagina=1' unless url.split(??).last.start_with? 'pagina'
-      
-      from.upto(to) { |i|
-        Nokogiri::HTML(open(url + i.to_s)).xpath('//div[@class="thumb"]/a/@href').each { |p|
-          next unless p.to_s.start_with? '/immagini/'
-          
-          Nokogiri::HTML(open("http://multiplayer.it#{p}")).xpath('//a[@class="button"]/@href').each { |u|
-            self.get path, u
-          }
-        }
+    def self.get_multiplayer(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+
+      url.gsub! /\/giochi\//, '/immagini/galleria/'
+      url.gsub! '.html', ''
+      gallery = JSON.parse open("#{url}?from=#{from}").read
+
+      to -= from if to >= 1
+      gallery['objects'].reverse[0..to].each { |image|
+        Thread.new {
+          self.get path, image['image']
+        }.join
       }
     end
 
     def self.info_multiplayer
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

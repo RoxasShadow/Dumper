@@ -21,20 +21,23 @@ module Dumper
   module Profiles
 
     def self.get_mangago(url, path, from = 1, to = 1)
+      ua      = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
       n_pages = to > 1 ? to : Nokogiri::HTML(open(url)).at_xpath('//div[@class="page_select right"]/div[2]').text.scan(/\d+/).last.to_i
 
       from.upto(n_pages) { |i|
-        page = Nokogiri::HTML(open(url))
+        Thread.new {
+          page = Nokogiri::HTML open(url)
 
-        url  = page.at_xpath('//a[@id="pic_container"]/@href').to_s
-        scan = page.at_xpath('//img[@id="page1"]/@src').to_s[0..-3]
+          url  = page.at_xpath('//a[@id="pic_container"]/@href').to_s
+          scan = page.at_xpath('//img[@id="page1"]/@src').to_s[0..-3]
 
-        self.get path, scan, 'mozilla', url, "#{i}.#{scan.split(?.).last}"
+          self.get path, scan, ua, url, "#{i}.#{scan.split(?.).last}"
+        }.join
       }
     end
 
     def self.info_mangago
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

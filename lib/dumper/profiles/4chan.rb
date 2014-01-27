@@ -20,14 +20,19 @@
 module Dumper
   module Profiles
 
-    def self.get_4chan(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//a[@class = "fileThumb"]/@href').each { |p|
-        self.get path, "http:#{p}"
+    def self.get_4chan(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+
+      Nokogiri::HTML(open(url)).xpath('//a[@class = "fileThumb"]/@href')[from..to].each { |p|
+        Thread.new {
+          self.get path, "http:#{p}"
+        }.join
       }
     end
 
     def self.info_4chan
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

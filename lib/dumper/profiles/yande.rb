@@ -25,18 +25,19 @@ module Dumper
       ref = url
 
       from.upto(to) { |i|
+        puts "--- Page #{i} ---"
+
         Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="thumb"]/@href').each { |p|
-          img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => ref)).at_xpath('//img[@id="image"]/@src').text
-          self.get path, img, ua, ref
+          Thread.new {
+            img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => ref)).at_xpath('//img[@id="image"]/@src').text
+            self.get path, img, ua, ref
+          }.join
         }
-        
-        puts "--- Page #{i} now... ---" # there are so much pages sometimes...
-        puts
       }
     end
 
     def self.info_yande
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :pages }
     end
 
   end

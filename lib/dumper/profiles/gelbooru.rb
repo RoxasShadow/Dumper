@@ -23,18 +23,18 @@ module Dumper
     def self.get_gelbooru(url, path, from = 1, to = 1)
       page = 0
       from.upto(to) { |i|
+        puts "--- Page #{i} now ---"
+        
         Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
           self.get path, u.child.child['src'].gsub(/thumbnails/, 'images').gsub(/thumbnail_/, '')
         }
         
         page += 63
-        puts "--- Page #{page} now... ---" # there are so much pages sometimes...
-        puts
       }
     end
 
     def self.info_gelbooru
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :pages }
     end
 
   end

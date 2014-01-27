@@ -20,39 +20,53 @@
 module Dumper
   module Profiles
 
-    ### ALMOST BROKEN ###
-    def self.get_sankakucomplex(url, path, from = 1, to = 1)
+    def self.get_sankakucomplex(url, path, from = 1, to = -1)
+      ua = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+
       if url.include?('idol.sankakucomplex') || url.include?('chan.sankakucomplex')
-        url.gsub!('index', 'index.content')
+        to     = 1 if to == -1
+        prefix = url.include?('idol.sankakucomplex') ? 'idol' : 'chan'
+
         from.upto(to) { |page|
-          u = url + "&page=#{page}"
-          op = open(u)
+          u  = url + "&page=#{page}"
           begin
-            Nokogiri::HTML(open(u)).xpath('//a/@href').each { |p|
-              p = url.gsub(/post(.+)/, p.to_s)
-              begin
-                Nokogiri::HTML(open(p)).xpath('//a[@id="image-link"]/img/@src').each { |q|
-                  self.get path, q
-                }
-              rescue Exception => e
-                sleep 1
-                retry
-              end
-            }
+            op = open u
           rescue Exception => e
             sleep 1
             retry
           end
+
+          Nokogiri::HTML(op).xpath('//a/@href').each { |p|
+            next unless p.to_s.start_with? '/post/show'
+
+            Thread.new {
+              begin
+                img = Nokogiri::HTML(open("http://#{prefix}.sankakucomplex.com/#{p}")).at_xpath('//a[@itemprop="contentUrl"]/@href').to_s
+                self.get path, img, ua, u
+              rescue Exception => e
+                retry
+              end
+            }.join
+          }
         }
       else
-        Nokogiri::HTML(open(url)).xpath('//a[@class="highslide"]/@href').each { |p|
-          self.get path, p
+        from -= 1
+        to   -= 1 if to >= 1
+
+        [].tap { |urls|
+          Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href').each { |u|
+            urls << u if u.to_s.start_with? 'http://images.sankakucomplex.com/wp-content/'
+          }
+        }[from..to].each { |p|
+          Thread.new {
+            self.get path, p, ua, url
+          }.join
         }
       end
     end
 
     def self.info_sankakucomplex
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

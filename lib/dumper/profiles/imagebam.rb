@@ -20,18 +20,25 @@
 module Dumper
   module Profiles
 
-    def self.get_imagebam(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//a[@style="border:none; margin:2px;"]/@href').each { |p|
-        next unless p.to_s.start_with? 'http://www.imagebam.com/image/'
-        
+    def self.get_imagebam(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+
+      [].tap { |urls|
+        Nokogiri::HTML(open(url)).xpath('//a[@style="border:none; margin:2px;"]/@href').each { |u|
+          urls << u if u.to_s.start_with? 'http://www.imagebam.com/image/'
+        }
+      }.reverse[from..to].each { |p|
         Nokogiri::HTML(open(p)).xpath('//img[@onclick="scale(this);"]/@src').each { |u|
-          self.get path, u
+          Thread.new {
+            self.get path, u
+          }
         }
       }
     end
 
     def self.info_imagebam
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

@@ -20,14 +20,19 @@
 module Dumper
   module Profiles
 
-    def self.get_deviantart(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]').each { |u|
-        self.get path, u['data-super-img']
+    def self.get_deviantart(url, path, from = 1, to = -1)
+      from -= 1
+      to   -= 1 if to >= 1
+
+      Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]')[from..to].each { |u|
+        Thread.new {
+          self.get path, u['data-super-img']
+        }.join
       }
     end
 
     def self.info_deviantart
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

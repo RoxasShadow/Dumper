@@ -20,30 +20,38 @@
 module Dumper
   module Profiles
 
-    def self.get_mangahere(url, path, from = 1, to = 1)
-      Nokogiri::HTML(open(url)).xpath('//div[@class="detail_list"]/ul/li').each { |p|
+    def self.get_mangahere(url, path, from = 1, to = -1)
+      from -=  1
+      to   -=  1 if to >= -1
+
+      [].tap { |urls|
+        Nokogiri::HTML(open(url)).xpath('//div[@class="detail_list"]/ul/li').each { |u|
+          urls << u unless u.at_xpath('.//span/a/@href').to_s.strip.empty?
+        }
+      }.reverse[from..to].each { |p|
         chapter = p.at_xpath('.//span/a/@href').to_s
         name    = p.at_xpath('.//span/a/text()').to_s.strip
-        next if chapter.strip.empty?
 
         dir = File.join path, name.sanitize_filename
         Dir.mkdir(dir) unless File.directory? dir
 
-        option = Nokogiri::HTML(open(chapter)).xpath('//select[@class="wid60"]/option')
+        option = Nokogiri::HTML(open(chapter)).xpath '//select[@class="wid60"]/option'
         first  = option.first.text.to_i
         last   = option.last.text.to_i
 
         first.upto(last) { |i|
-          url = chapter.gsub(/\/[0-9]+\.html/, '') + i.to_s + '.html'
+          Thread.new {
+            url = chapter.gsub(/\/[0-9]+\.html/, '') + i.to_s + '.html'
 
-          scan = Nokogiri::HTML(open(url)).xpath('//section[@id="viewer"]/a/img/@src')[0].to_s
-          self.get dir, scan, '', '', "#{i}.png"
+            scan = Nokogiri::HTML(open(url)).xpath('//section[@id="viewer"]/a/img/@src')[0].to_s
+            self.get dir, scan, '', '', "#{i}.png"
+          }.join
         }
       }
     end
 
     def self.info_mangahere
-      { :from => false, :to => false }
+      { from: :enabled, to: :enabled, type: :chapters }
     end
 
   end

@@ -18,14 +18,15 @@
 #++
 
 require 'open-uri'
+require 'net/http'
 require 'uri'
 require 'optparse'
-require 'net/http'
+require 'base64'
 require 'nokogiri'
 require 'openssl'
 require 'certified'
 require 'addressable/uri'
-require 'base64'
+require 'json'
 
 require 'dumper/utils'
 Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|

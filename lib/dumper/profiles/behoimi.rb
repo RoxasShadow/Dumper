@@ -26,13 +26,15 @@ module Dumper
 
       from.upto(to) { |i|
         Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//img[@class="preview    "]/@src').each { |p|
-          self.get path, p.to_s.gsub('preview/', ''), ua, ref
+          Thread.new {
+            self.get path, p.to_s.gsub('preview/', ''), ua, ref
+          }.join
         }
       }
     end
 
     def self.info_behoimi
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

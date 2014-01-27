@@ -35,17 +35,19 @@ module Dumper
         file     = "%03d.jpg" % i
         filename =  "#{cdn}#{file}"
 
-        unless self.get path, URI.parse(URI.encode(filename, '[]')), ua, ref
-          errors += 1
-          
-          file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-          File.delete(file) if File.exists? file
-        end
+        Thread.new {
+          unless self.get path, URI.parse(URI.encode(filename, '[]')), ua, ref
+            errors += 1
+            
+            file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+            File.delete(file) if File.exists? file
+          end
+        }.join
       }
     end
 
     def self.info_fakku
-      { :from => true, :to => true }
+      { from: :enabled, to: :enabled, type: :images }
     end
 
   end

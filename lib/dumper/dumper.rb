@@ -52,7 +52,7 @@ module Dumper; module Profiles
       end
     rescue Exception => e
       p e
-      puts "Error downloading \#{p}."
+      puts "Error downloading #{p}."
       return false
     end
     return true
