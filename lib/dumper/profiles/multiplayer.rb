@@ -20,19 +20,28 @@
 module Dumper
   module Profiles
 
+    class Multiplayer < Profile
+      def dump(url, path, from, to)
+        from -= 1
+        to   -= 1 if to >= 1
+
+        url.gsub! /\/giochi\//, '/immagini/galleria/'
+        url.gsub! '.html', ''
+        gallery = JSON.parse open("#{url}?from=#{from}").read
+
+        to -= from if to >= 1
+        gallery['objects'].reverse[0..to].each { |image|
+          @pool.process {
+            Dumper::Profiles.get path, image['image']
+          }
+        }
+      end
+    end
+
     def self.get_multiplayer(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= 1
-
-      url.gsub! /\/giochi\//, '/immagini/galleria/'
-      url.gsub! '.html', ''
-      gallery = JSON.parse open("#{url}?from=#{from}").read
-
-      to -= from if to >= 1
-      gallery['objects'].reverse[0..to].each { |image|
-        Thread.new {
-          self.get path, image['image']
-        }.join
+      Multiplayer.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

@@ -20,34 +20,43 @@
 module Dumper
   module Profiles
 
-    def self.get_mangaeden(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= -1
-      
-      Nokogiri::HTML(open(url)).xpath('//a[@class="chapterLink"]').reverse[from..to].each { |p|
-        i = 1
+    class MangaEden < Profile
+      def dump(url, path, from, to)
+        from -= 1
+        to   -= 1 if to >= -1
         
-        dir = File.join path, "#{p.children[1].text} - #{p.children[3].text.sanitize_filename}"
-        Dir.mkdir(dir) unless File.directory? dir
-        
-        page = Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}"))
+        Nokogiri::HTML(open(url)).xpath('//a[@class="chapterLink"]').reverse[from..to].each { |p|
+          i = 1
+          
+          dir = File.join path, "#{p.children[1].text} - #{p.children[3].text.sanitize_filename}"
+          Dir.mkdir(dir) unless File.directory? dir
+          
+          page = Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}"))
 
-        page.xpath('//img[@id="mainImg"]/@src').each { |r|
-          self.get dir, r, '', '', "1.png"
-          i += 1
-        }
-        
-        page.xpath('//a[@class="ui-state-default"]').each { |q|
-          next unless q.text.numeric?        
-          q = q['href']
+          page.xpath('//img[@id="mainImg"]/@src').each { |r|
+            Dumper::Profiles.get dir, r, '', '', "1.png"
+            i += 1
+          }
+          
+          page.xpath('//a[@class="ui-state-default"]').each { |q|
+            next unless q.text.numeric?        
+            q = q['href']
 
-          Nokogiri::HTML(open("http://www.mangaeden.com#{q}")).xpath('//img[@id="mainImg"]/@src').each { |r|
-            Thread.new {
-              self.get dir, r, '', '', "#{i}.png"
-              i += 1
-            }.join
+            Nokogiri::HTML(open("http://www.mangaeden.com#{q}")).xpath('//img[@id="mainImg"]/@src').each { |r|
+              @pool.process {
+                Dumper::Profiles.get dir, r, '', '', "#{i}.png"
+                i += 1
+              }
+            }
           }
         }
+      end
+    end
+
+    def self.get_mangaeden(url, path, from = 1, to = -1)
+      MangaEden.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

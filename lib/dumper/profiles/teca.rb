@@ -20,19 +20,28 @@
 module Dumper
   module Profiles
 
-    def self.get_teca(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= 1
-      url   = url.split('index').first
+    class Teca < Profile
+      def dump(url, path, from, to)
+        from -= 1
+        to   -= 1 if to >= 1
+        url   = url.split('index').first
 
-      [].tap { |urls|
-        Nokogiri::HTML(open(url)).xpath('//a/@href').each { |u|
-          urls << u if u.to_s =~ /.\.(png|bmp|jpeg|jpg|gif|tiff)$/i
+        [].tap { |urls|
+          Nokogiri::HTML(open(url)).xpath('//a/@href').each { |u|
+            urls << u if u.to_s =~ /.\.(png|bmp|jpeg|jpg|gif|tiff)$/i
+          }
+        }.reverse[from..to].each { |p|
+          @pool.process {
+            Dumper::Profiles.get path, "#{url}/#{p}"
+          }
         }
-      }.reverse[from..to].each { |p|
-        Thread.new {
-          self.get path, "#{url}/#{p}"
-        }.join
+      end
+    end
+
+    def self.get_teca(url, path, from = 1, to = -1)
+      Teca.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

@@ -18,6 +18,22 @@
 #++
 
 module Dumper; module Profiles
+
+  class Profile
+    def initialize(&block)
+      @pool = Thread.pool 8
+      
+      instance_eval(&block)
+    end
+
+    def dump(url, path, *args)
+      raise NotImplementedError
+    end
+
+    def shutdown
+      @pool.shutdown
+    end
+  end
   
   def self.list
     Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map { |f|

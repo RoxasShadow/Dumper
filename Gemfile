@@ -5,6 +5,7 @@ gem 'nokogiri'
 gem 'certified'
 gem 'addressable'
 gem 'json'
+gem 'thread'
 
 # spec
 gem 'rspec'

@@ -20,18 +20,28 @@
 module Dumper
   module Profiles
 
-    def self.get_booru(url, path, from = 1, to = 1)
-      page = 0
-      from.upto(to) { |i|
-        puts "--- Page #{i} ---"
-
-        Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
-          Thread.new {
-            self.get path, u.child.child['src'].gsub(/thumbs/, 'img').gsub(/thumbnails\//, 'images/').gsub(/thumbnail_/, '')
-          }.join
-        }
+    class Booru < Profile
+      def dump(url, path, from, to)
+        page = 0
         
-        page += 40
+        from.upto(to) { |i|
+          puts "--- Page #{i} ---"
+
+          Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
+            @pool.process {
+              Dumper::Profiles.get path, u.child.child['src'].gsub(/thumbs/, 'img').gsub(/thumbnails\//, 'images/').gsub(/thumbnail_/, '')
+            }
+          }
+          
+          page += 40
+        }
+      end
+    end
+
+    def self.get_booru(url, path, from = 1, to = 1)
+      Booru.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

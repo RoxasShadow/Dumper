@@ -27,11 +27,12 @@ require 'openssl'
 require 'certified'
 require 'addressable/uri'
 require 'json'
+require 'thread/pool'
 
 require 'dumper/utils'
+require 'dumper/dumper'
+require 'dumper/version'
+
 Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
 }
-require 'dumper/dumper'
-
-require 'dumper/version'

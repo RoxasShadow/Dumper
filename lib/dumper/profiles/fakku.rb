@@ -20,29 +20,38 @@
 module Dumper
   module Profiles
 
-    def self.get_fakku(url, path, from = 1, to = 999)
-      url    += '/read' unless url.end_with? '/read'
-      errors = 0
-      
-      cdn = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
-
-      ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-      ref = url
-
-      from.upto(to) { |i|
-        return if errors == 10
+    class Fakku < Profile
+      def dump(url, path, from, to)
+        url    += '/read' unless url.end_with? '/read'
+        errors = 0
         
-        file     = "%03d.jpg" % i
-        filename =  "#{cdn}#{file}"
+        cdn = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
 
-        Thread.new {
-          unless self.get path, URI.parse(URI.encode(filename, '[]')), ua, ref
-            errors += 1
-            
-            file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-            File.delete(file) if File.exists? file
-          end
-        }.join
+        ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+        ref = url
+
+        from.upto(to) { |i|
+          return if errors == 10
+          
+          file     = "%03d.jpg" % i
+          filename =  "#{cdn}#{file}"
+
+          @pool.process {
+            unless Dumper::Profiles.get path, URI.parse(URI.encode(filename, '[]')), ua, ref
+              errors += 1
+              
+              file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
+              File.delete(file) if File.exists? file
+            end
+          }
+        }
+      end
+    end
+
+    def self.get_fakku(url, path, from = 1, to = 999)
+      Fakku.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

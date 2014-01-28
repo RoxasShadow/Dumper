@@ -1,0 +1,3 @@
+add UA as constant in Profile class
+set min-max threads in the pool
+run all the tests

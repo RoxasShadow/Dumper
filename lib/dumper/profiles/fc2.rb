@@ -20,14 +20,23 @@
 module Dumper
   module Profiles
 
-    def self.get_fc2(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= 1
+    class Fc2 < Profile
+      def dump(url, path, from, to)
+        from -= 1
+        to   -= 1 if to >= 1
 
-      Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href')[from..to].each { |p|
-        Thread.new {
-          self.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
-        }.join
+        Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href')[from..to].each { |p|
+          @pool.process {
+            Dumper::Profiles.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
+          }
+        }
+      end
+    end
+
+    def self.get_fc2(url, path, from = 1, to = -1)
+      Fc2.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

@@ -20,14 +20,23 @@
 module Dumper
   module Profiles
 
-    def self.get_4chan(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= 1
+    class FourChan < Profile
+      def dump(url, path, from, to)
+        from -= 1
+        to   -= 1 if to >= 1
 
-      Nokogiri::HTML(open(url)).xpath('//a[@class = "fileThumb"]/@href')[from..to].each { |p|
-        Thread.new {
-          self.get path, "http:#{p}"
-        }.join
+        Nokogiri::HTML(open(url)).xpath('//a[@class = "fileThumb"]/@href')[from..to].each { |p|
+          @pool.process {
+            Dumper::Profiles.get path, "http:#{p}"
+          }
+        }
+      end
+    end
+
+    def self.get_4chan(url, path, from = 1, to = -1)
+      FourChan.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

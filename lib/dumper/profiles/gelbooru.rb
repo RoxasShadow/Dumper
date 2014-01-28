@@ -20,16 +20,28 @@
 module Dumper
   module Profiles
 
-    def self.get_gelbooru(url, path, from = 1, to = 1)
-      page = 0
-      from.upto(to) { |i|
-        puts "--- Page #{i} now ---"
+    class Gelbooru < Profile
+      def dump(url, path, from, to)
+        page = 0
         
-        Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
-          self.get path, u.child.child['src'].gsub(/thumbnails/, 'images').gsub(/thumbnail_/, '')
+        from.upto(to) { |i|
+          puts "--- Page #{i} now ---"
+          
+          Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
+            @pool.process {
+              Dumper::Profiles.get path, u.child.child['src'].gsub(/thumbnails/, 'images').gsub(/thumbnail_/, '')
+            }
+          }
+          
+          page += 63
         }
-        
-        page += 63
+      end
+    end
+
+    def self.get_gelbooru(url, path, from = 1, to = 1)
+      Gelbooru.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

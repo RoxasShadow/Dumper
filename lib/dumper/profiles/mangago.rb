@@ -20,19 +20,28 @@
 module Dumper
   module Profiles
 
+    class MangaGo < Profile
+      def dump(url, path, from, to)
+        ua      = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+        n_pages = to > 1 ? to : Nokogiri::HTML(open(url)).at_xpath('//div[@class="page_select right"]/div[2]').text.scan(/\d+/).last.to_i
+
+        from.upto(n_pages) { |i|
+          @pool.process {
+            page = Nokogiri::HTML open(url)
+
+            url  = page.at_xpath('//a[@id="pic_container"]/@href').to_s
+            scan = page.at_xpath('//img[@id="page1"]/@src').to_s[0..-3]
+
+            Dumper::Profiles.get path, scan, ua, url, "#{i}.#{scan.split(?.).last}"
+          }
+        }
+      end
+    end
+
     def self.get_mangago(url, path, from = 1, to = 1)
-      ua      = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-      n_pages = to > 1 ? to : Nokogiri::HTML(open(url)).at_xpath('//div[@class="page_select right"]/div[2]').text.scan(/\d+/).last.to_i
-
-      from.upto(n_pages) { |i|
-        Thread.new {
-          page = Nokogiri::HTML open(url)
-
-          url  = page.at_xpath('//a[@id="pic_container"]/@href').to_s
-          scan = page.at_xpath('//img[@id="page1"]/@src').to_s[0..-3]
-
-          self.get path, scan, ua, url, "#{i}.#{scan.split(?.).last}"
-        }.join
+      MangaGo.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

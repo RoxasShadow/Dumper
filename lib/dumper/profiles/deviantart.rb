@@ -20,14 +20,23 @@
 module Dumper
   module Profiles
 
-    def self.get_deviantart(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= 1
+    class DeviantArt < Profile
+      def dump(url, path, from, to)
+        from -= 1
+        to   -= 1 if to >= 1
 
-      Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]')[from..to].each { |u|
-        Thread.new {
-          self.get path, u['data-super-img']
-        }.join
+        Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]')[from..to].each { |u|
+          @pool.process {
+            Dumper::Profiles.get path, u['data-super-img']
+          }
+        }
+      end
+    end
+
+    def self.get_deviantart(url, path, from = 1, to = -1)
+      DeviantArt.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

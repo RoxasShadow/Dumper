@@ -20,20 +20,29 @@
 module Dumper
   module Profiles
 
-    def self.get_imagebam(url, path, from = 1, to = -1)
-      from -= 1
-      to   -= 1 if to >= 1
+    class Imagebam < Profile
+      def dump(url, path, from, to)
+          from -= 1
+          to   -= 1 if to >= 1
 
-      [].tap { |urls|
-        Nokogiri::HTML(open(url)).xpath('//a[@style="border:none; margin:2px;"]/@href').each { |u|
-          urls << u if u.to_s.start_with? 'http://www.imagebam.com/image/'
-        }
-      }.reverse[from..to].each { |p|
-        Nokogiri::HTML(open(p)).xpath('//img[@onclick="scale(this);"]/@src').each { |u|
-          Thread.new {
-            self.get path, u
+          [].tap { |urls|
+            Nokogiri::HTML(open(url)).xpath('//a[@style="border:none; margin:2px;"]/@href').each { |u|
+              urls << u if u.to_s.start_with? 'http://www.imagebam.com/image/'
+            }
+          }.reverse[from..to].each { |p|
+            Nokogiri::HTML(open(p)).xpath('//img[@onclick="scale(this);"]/@src').each { |u|
+              @pool.process {
+                Dumper::Profiles.get path, u
+              }
+            }
           }
-        }
+      end
+    end
+
+    def self.get_imagebam(url, path, from = 1, to = -1)
+      Imagebam.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

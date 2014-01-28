@@ -20,49 +20,58 @@
 module Dumper
   module Profiles
 
-    def self.get_sankakucomplex(url, path, from = 1, to = -1)
-      ua = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+    class SankakuComplex < Profile
+      def dump(url, path, from, to)
+        ua = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
 
-      if url.include?('idol.sankakucomplex') || url.include?('chan.sankakucomplex')
-        to     = 1 if to == -1
-        prefix = url.include?('idol.sankakucomplex') ? 'idol' : 'chan'
+        if url.include?('idol.sankakucomplex') || url.include?('chan.sankakucomplex')
+          to     = 1 if to == -1
+          prefix = url.include?('idol.sankakucomplex') ? 'idol' : 'chan'
 
-        from.upto(to) { |page|
-          u  = url + "&page=#{page}"
-          begin
-            op = open u
-          rescue Exception => e
-            sleep 1
-            retry
-          end
+          from.upto(to) { |page|
+            u  = url + "&page=#{page}"
+            begin
+              op = open u
+            rescue Exception => e
+              sleep 1
+              retry
+            end
 
-          Nokogiri::HTML(op).xpath('//a/@href').each { |p|
-            next unless p.to_s.start_with? '/post/show'
+            Nokogiri::HTML(op).xpath('//a/@href').each { |p|
+              next unless p.to_s.start_with? '/post/show'
 
-            Thread.new {
-              begin
-                img = Nokogiri::HTML(open("http://#{prefix}.sankakucomplex.com/#{p}")).at_xpath('//a[@itemprop="contentUrl"]/@href').to_s
-                self.get path, img, ua, u
-              rescue Exception => e
-                retry
-              end
-            }.join
+              @pool.process {
+                begin
+                  img = Nokogiri::HTML(open("http://#{prefix}.sankakucomplex.com/#{p}")).at_xpath('//a[@itemprop="contentUrl"]/@href').to_s
+                  Dumper::Profiles.get path, img, ua, u
+                rescue Exception => e
+                  retry
+                end
+              }
+            }
           }
-        }
-      else
-        from -= 1
-        to   -= 1 if to >= 1
+        else
+          from -= 1
+          to   -= 1 if to >= 1
 
-        [].tap { |urls|
-          Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href').each { |u|
-            urls << u if u.to_s.start_with? 'http://images.sankakucomplex.com/wp-content/'
+          [].tap { |urls|
+            Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href').each { |u|
+              urls << u if u.to_s.start_with? 'http://images.sankakucomplex.com/wp-content/'
+            }
+          }[from..to].each { |p|
+            @pool.process {
+              Dumper::Profiles.get path, p, ua, url
+            }
           }
-        }[from..to].each { |p|
-          Thread.new {
-            self.get path, p, ua, url
-          }.join
-        }
+        end
       end
+    end
+
+    def self.get_sankakucomplex(url, path, from = 1, to = -1)
+      SankakuComplex.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
+      }
     end
 
     def self.info_sankakucomplex

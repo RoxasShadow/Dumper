@@ -20,19 +20,28 @@
 module Dumper
   module Profiles
 
-    def self.get_yande(url, path, from = 1, to = 1)
-      ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-      ref = url
+    class YandeRe < Profile
+      def dump(url, path, from, to)
+        ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+        ref = url
 
-      from.upto(to) { |i|
-        puts "--- Page #{i} ---"
+        from.upto(to) { |i|
+          puts "--- Page #{i} ---"
 
-        Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="thumb"]/@href').each { |p|
-          Thread.new {
-            img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => ref)).at_xpath('//img[@id="image"]/@src').text
-            self.get path, img, ua, ref
-          }.join
+          Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="thumb"]/@href').each { |p|
+            @pool.process {
+              img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => ref)).at_xpath('//img[@id="image"]/@src').text
+              Dumper::Profiles.get path, img, ua, ref
+            }
+          }
         }
+      end
+    end
+
+    def self.get_yande(url, path, from = 1, to = 1)
+      YandeRe.new { |p|
+        p.dump     url, path, from, to
+        p.shutdown
       }
     end
 

@@ -20,6 +20,7 @@ Gem::Specification.new { |s|
   s.add_dependency 'certified'
   s.add_dependency 'addressable'
   s.add_dependency 'json'
+  s.add_dependency 'thread'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
