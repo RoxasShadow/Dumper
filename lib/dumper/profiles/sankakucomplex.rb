@@ -22,14 +22,12 @@ module Dumper
 
     class SankakuComplex < Profile
       def dump(url, path, from, to)
-        ua = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-
         if url.include?('idol.sankakucomplex') || url.include?('chan.sankakucomplex')
           to     = 1 if to == -1
           prefix = url.include?('idol.sankakucomplex') ? 'idol' : 'chan'
 
           from.upto(to) { |page|
-            u  = url + "&page=#{page}"
+            u = url + "&page=#{page}"
             begin
               op = open u
             rescue Exception => e
@@ -43,7 +41,7 @@ module Dumper
               @pool.process {
                 begin
                   img = Nokogiri::HTML(open("http://#{prefix}.sankakucomplex.com/#{p}")).at_xpath('//a[@itemprop="contentUrl"]/@href').to_s
-                  Dumper::Profiles.get path, img, ua, u
+                  Dumper::Profiles.get path, img, { referer: u }
                 rescue Exception => e
                   retry
                 end
@@ -60,22 +58,24 @@ module Dumper
             }
           }[from..to].each { |p|
             @pool.process {
-              Dumper::Profiles.get path, p, ua, url
+              Dumper::Profiles.get path, p, { referer: url }
             }
           }
         end
       end
     end
 
-    def self.get_sankakucomplex(url, path, from = 1, to = -1)
-      SankakuComplex.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_sankakucomplex(url, path, from = 1, to = -1)
+        SankakuComplex.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_sankakucomplex
-      { from: :enabled, to: :enabled, type: :images }
+      def info_sankakucomplex
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

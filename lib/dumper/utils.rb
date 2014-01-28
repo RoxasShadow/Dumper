@@ -18,7 +18,6 @@
 #++
 
 class String
-
   def numeric?
     self.to_i.to_s == self || self.to_f.to_s == self
   end
@@ -26,7 +25,6 @@ class String
   def sanitize_filename
     self.split(/(?<=.)\.(?=[^.])(?!.*\.[^.])/m).map { |s| s.gsub /[^a-z0-9\-]+/i, ?_ }.join(?.)
   end
-  
 end
 
 class NilClass

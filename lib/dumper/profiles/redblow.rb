@@ -24,26 +24,26 @@ module Dumper
       def dump(url, path, from, to)
       from -= 1
       to   -= 1 if to >= 1
-      ua    = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-      ref   = url
       
       Nokogiri::HTML(open(url)).xpath('//img[@class="attachment-medium"]/@src')[from..to].each { |p|
         @pool.process {
-          Dumper::Profiles.get path, p, ua, ref
+          Dumper::Profiles.get path, p, { referer: url }
         }
       }
       end
     end
 
-    def self.get_redblow(url, path, from = 1, to = -1)
-      RedBlow.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_redblow(url, path, from = 1, to = -1)
+        RedBlow.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_redblow
-      { from: :enabled, to: :enabled, type: :images }
+      def info_redblow
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

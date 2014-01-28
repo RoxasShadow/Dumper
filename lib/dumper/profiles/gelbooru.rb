@@ -25,7 +25,7 @@ module Dumper
         page = 0
         
         from.upto(to) { |i|
-          puts "--- Page #{i} now ---"
+          puts "--- Page #{i} now ---" if Dumper::Profiles.verbose?
           
           Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
             @pool.process {
@@ -38,15 +38,17 @@ module Dumper
       end
     end
 
-    def self.get_gelbooru(url, path, from = 1, to = 1)
-      Gelbooru.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_gelbooru(url, path, from = 1, to = 1)
+        Gelbooru.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_gelbooru
-      { from: :enabled, to: :enabled, type: :pages }
+      def info_gelbooru
+        { from: :enabled, to: :enabled, type: :pages }
+      end
     end
 
   end

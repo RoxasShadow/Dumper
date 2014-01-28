@@ -27,9 +27,6 @@ module Dumper
         
         cdn = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
 
-        ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-        ref = url
-
         from.upto(to) { |i|
           return if errors == 10
           
@@ -37,7 +34,7 @@ module Dumper
           filename =  "#{cdn}#{file}"
 
           @pool.process {
-            unless Dumper::Profiles.get path, URI.parse(URI.encode(filename, '[]')), ua, ref
+            unless Dumper::Profiles.get path, URI.parse(URI.encode(filename, '[]')), { referer: url }
               errors += 1
               
               file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
@@ -48,15 +45,17 @@ module Dumper
       end
     end
 
-    def self.get_fakku(url, path, from = 1, to = 999)
-      Fakku.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_fakku(url, path, from = 1, to = 999)
+        Fakku.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_fakku
-      { from: :enabled, to: :enabled, type: :images }
+      def info_fakku
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

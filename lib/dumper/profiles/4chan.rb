@@ -33,15 +33,17 @@ module Dumper
       end
     end
 
-    def self.get_4chan(url, path, from = 1, to = -1)
-      FourChan.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_4chan(url, path, from = 1, to = -1)
+        FourChan.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_4chan
-      { from: :enabled, to: :enabled, type: :images }
+      def info_4chan
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

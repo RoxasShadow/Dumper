@@ -33,15 +33,17 @@ module Dumper
       end
     end
 
-    def self.get_fc2(url, path, from = 1, to = -1)
-      Fc2.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_fc2(url, path, from = 1, to = -1)
+        Fc2.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_fc2
-      { from: :enabled, to: :enabled, type: :images }
+      def info_fc2
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

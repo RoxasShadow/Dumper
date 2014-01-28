@@ -31,10 +31,10 @@ module Dumper
           dir = File.join path, "#{p.children[1].text} - #{p.children[3].text.sanitize_filename}"
           Dir.mkdir(dir) unless File.directory? dir
           
-          page = Nokogiri::HTML(open("http://www.mangaeden.com#{p['href']}"))
+          page = Nokogiri::HTML open("http://www.mangaeden.com#{p['href']}")
 
           page.xpath('//img[@id="mainImg"]/@src').each { |r|
-            Dumper::Profiles.get dir, r, '', '', "1.png"
+            Dumper::Profiles.get dir, r, { filename: '1.png' }
             i += 1
           }
           
@@ -44,7 +44,7 @@ module Dumper
 
             Nokogiri::HTML(open("http://www.mangaeden.com#{q}")).xpath('//img[@id="mainImg"]/@src').each { |r|
               @pool.process {
-                Dumper::Profiles.get dir, r, '', '', "#{i}.png"
+                Dumper::Profiles.get dir, r, { filename: "#{i}.png" }
                 i += 1
               }
             }
@@ -53,15 +53,17 @@ module Dumper
       end
     end
 
-    def self.get_mangaeden(url, path, from = 1, to = -1)
-      MangaEden.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_mangaeden(url, path, from = 1, to = -1)
+        MangaEden.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_mangaeden
-      { from: :enabled, to: :enabled, type: :chapters }
+      def info_mangaeden
+        { from: :enabled, to: :enabled, type: :chapters }
+      end
     end
 
   end

@@ -33,15 +33,17 @@ module Dumper
       end
     end
 
-    def self.get_deviantart(url, path, from = 1, to = -1)
-      DeviantArt.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_deviantart(url, path, from = 1, to = -1)
+        DeviantArt.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_deviantart
-      { from: :enabled, to: :enabled, type: :images }
+      def info_deviantart
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

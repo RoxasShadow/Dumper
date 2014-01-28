@@ -17,76 +17,122 @@
 # along with Dumper.  If not, see <http://www.gnu.org/licenses/>.
 #++
 
-module Dumper; module Profiles
+module Dumper
+  module Profiles
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
 
-  class Profile
-    def initialize(&block)
-      @pool = Thread.pool 8
+    class Profile
+      include Dumper::Profiles
+
+      def initialize(&block)
+        min = pool_size[:min]
+        max = pool_size[:max]
+
+        @pool = Thread.pool min, max
+        puts "Using #{min}:#{max || min} threads..."
+
+        instance_eval &block
+      end
+
+      def dump(url, path, *args)
+        raise NotImplementedError
+      end
+
+      def shutdown
+        @pool.shutdown
+      end
+    end
+
+    def pool_size
+      {
+        min: @min || 4,
+        max: @max
+      }
+    end
+
+    def verbose?
+      @verbose == nil || @verbose == true
+    end
+
+    class << self
+      def pool_size=(min, max = nil)
+        @min = min
+        @max = max
+      end
+
+      def verbose=(verbose)
+        @verbose = verbose
+      end
+
+      def verbose?
+      @verbose == nil || @verbose == true
+      end
+
+      def list
+        Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map { |f|
+          f = File.basename(f).split(?.)[0]
+        }
+      end
       
-      instance_eval(&block)
-    end
+      def get(path, url, options = {})
+        url     = url.to_s
+        
+        begin
+          if url.start_with? 'data:image/'
+            filename = File.join path, options[:filename] || rand(1000).to_s + '.' + url.split('data:image/')[1].split(?;)[0]
+            filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
 
-    def dump(url, path, *args)
-      raise NotImplementedError
-    end
+            url.gsub /data:image\/png;base64,/, ''
 
-    def shutdown
-      @pool.shutdown
+            if File.exists? filename
+              puts "File #{filename} already exists."           if verbose?
+            else
+              puts "Downloading base64 image as #{filename}..." if verbose?
+              File.open(filename, 'wb') { |f|
+                f.write Base64.decode64(url)
+              }
+            end
+          else
+            filename = File.join path, options[:filename] || File.basename(url)
+            filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
+
+            if File.exists? filename
+              puts "File #{filename} already exists." if verbose?
+            else
+              filename = File.join(path, rand(1000).to_s + '.jpg') unless filename[-4] == ?. || filename[-5] == ?.
+              puts "Downloading #{url} as #{filename}..." if verbose?
+
+              File.open(filename, 'wb') { |f|
+                f.write open(url,
+                  'User-Agent' => options[:user_agent] || USER_AGENT,
+                  'Referer'    => options[:referer   ] || url
+                ).read
+              }
+            end
+          end
+        rescue Exception => e
+          p e
+          puts "Error downloading #{url}."
+          return false
+        end
+        
+        true
+      end
+
+      def get_generic(url, path, xpath)
+        uri = nil
+        Nokogiri::HTML(open(url)).xpath(xpath).each { |p|
+          if p.to_s.start_with? ?/
+            uri = URI(url) if uri.nil?
+            p   = "#{uri.scheme}://#{uri.host}#{p}"
+          end
+          get path, p
+        }
+      end
     end
-  end
-  
-  def self.list
-    Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map { |f|
-      f = File.basename(f).split(?.)[0]
-    }
-  end
-  
-  def self.get(path, p, ua = '', ref = '', filename = '')
-    p = p.to_s
     
-    begin
-      if p.start_with? 'data:image/'
-        filename = File.join path, filename == '' ? rand(1000).to_s + '.' + p.split('data:image/')[1].split(?;)[0] : filename
-        filename.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-        if File.exists? filename
-          puts "File #{filename} already exists."
-        else
-          puts "Downloading base64 image as #{filename}..."
-          p.gsub!(/data:image\/png;base64,/, '')
-          File.open(filename, 'wb') { |f| f.write Base64.decode64(p) }
-        end
-      else
-        filename = File.join path, filename == '' ? File.basename(p) : filename
-        filename.gsub!(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
-        if File.exists? filename
-          puts "File #{filename} already exists."
-        else
-          filename = File.join path, rand(1000).to_s + '.jpg' unless filename[-4] == ?. || filename[-5] == ?.
-          puts "Downloading #{p} as #{filename}..."
-          File.open(filename, 'wb') { |f| f.write open(p, 'User-Agent' => ua, 'Referer' => ref).read }
-        end
-      end
-    rescue Exception => e
-      p e
-      puts "Error downloading #{p}."
-      return false
+    def method_missing(method, *args, &block)
+      "'#{method.split('get_')[1]}' profile not found."
     end
-    return true
   end
-
-  def self.get_generic(url, path, xpath)
-    uri = nil
-    Nokogiri::HTML(open(url)).xpath(xpath).each { |p|
-      if p.to_s.start_with? ?/
-        uri = URI(url) if uri.nil?
-        p   = "#{uri.scheme}://#{uri.host}#{p}"
-      end
-      self.get path, p
-    }
-  end
-  
-  def method_missing(method, *args, &block)
-    "'#{method.split('get_')[1]}' profile not found."
-  end
-  
-end; end
+end

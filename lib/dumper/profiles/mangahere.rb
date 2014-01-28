@@ -45,22 +45,24 @@ module Dumper
               url = chapter.gsub(/\/[0-9]+\.html/, '') + i.to_s + '.html'
 
               scan = Nokogiri::HTML(open(url)).xpath('//section[@id="viewer"]/a/img/@src')[0].to_s
-              Dumper::Profiles.get dir, scan, '', '', "#{i}.png"
+              Dumper::Profiles.get dir, scan, { filename: "#{i}.png" }
             }
           }
         }
       end
     end
 
-    def self.get_mangahere(url, path, from = 1, to = -1)
-      MangaHere.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_mangahere(url, path, from = 1, to = -1)
+        MangaHere.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_mangahere
-      { from: :enabled, to: :enabled, type: :chapters }
+      def info_mangahere
+        { from: :enabled, to: :enabled, type: :chapters }
+      end
     end
 
   end

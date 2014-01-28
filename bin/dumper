@@ -22,18 +22,18 @@ require 'dumper'
 options = {}
 
 OptionParser.new do |o|
-  options[:url]  = []
+  options[:url ] = []
   options[:path] = []
   
-  o.on '-l', '--list', 'Show available profiles' do
+  o.on '-l', '--list',            'Show available profiles' do
     abort 'Profiles available:'.tap { |s|
       Dumper::Profiles::list.sort { |a, b| a <=> b }.each { |p| s << "\n" + (' ' * 3) + p }
     } if ARGV.empty?
   end
 
-  o.on '-i', '--info PROFILE', 'Get info about profiles' do |profile|
+  o.on '-i', '--info PROFILE',    'Get info about profiles' do |profile|
     if Dumper::Profiles::list.include? profile
-      method = ("info_#{profile}").to_sym
+      method = ("info_#{profile}").to_sym      
       Dumper::Profiles::send(method).tap { |i|
         puts "Option 'from' is #{i[:from] ? 'available' : 'not available'}."
         puts "Option 'to'   is #{i[:to]   ? 'available' : 'not available'}."
@@ -44,67 +44,75 @@ OptionParser.new do |o|
     end
   end
   
-  o.on '-u', '--url URL', 'Target URL' do |url|
-    options[:url] << url
+  o.on '-u', '--url URL',         'Target URL'    do |url|
+    options[:url]    << url
   end
   
-  o.on '-f', '--file FILE', 'File containing a list of URLs, a double pipe (||) and the target folder, one per line' do |file|
+  o.on '-o', '--from PAGE',       'Start to save from... (if allowed)' do |pages|
+    options[:from]    = pages.to_i
+  end
+  
+  o.on '-g', '--to PAGE',         'Finish to save at... (if allowed)'  do |pages|
+    options[:to]      = pages.to_i
+  end
+  
+  o.on '-p', '--path PATH',       'Target folder'      do |path|
+    options[:path]   << path
+  end
+  
+  o.on '-x', '--xpath XPATH',     'Use a custom xpath' do |xpath|
+    options[:xpath]   = xpath
+  end
+  
+  o.on '-r', '--profile PROFILE', 'Force the use of the given profile' do |profile|
+    options[:profile] = profile
+  end
+  
+  o.on '-t', '--threads MIN:MAX',  'Set the number of threads to use'   do |threads|
+    threads = threads.split ?:
+    Dumper::Profiles.pool_size = threads[0].to_i, threads[1].to_i
+  end
+  
+  o.on '-s', '--silence',         'Print only important messages' do
+    Dumper::Profiles.verbose = false
+  end
+  
+  o.on '-f', '--file FILE',       'File containing in each line "URL||Folder"' do |file|
     file = File.open(file).read.gsub(/\r\n?/, "\n")
     file.each_line { |line|
-      split             = line.split('||')
+      split              = line.split '||'
       options[:url]     << split[0].strip
       options[:path]    << split[1].strip
     }
   end
-  
-  o.on '-p', '--path PATH', 'Target folder' do |path|
-    options[:path] << path
-  end
-  
-  o.on '-r', '--profile PROFILE', 'Use the given profile' do |profile|
-    options[:profile] = profile
-  end
-  
-  o.on '-x', '--xpath XPATH', 'Custom xpath' do |xpath|
-    options[:xpath] = xpath
-  end
-  
-  o.on '-o', '--from PAGE', 'Start to save from... (if allowed)' do |pages|
-    options[:from] = pages.to_i
-  end
-  
-  o.on '-g', '--to PAGE', 'Finish to save at... (if allowed)' do |pages|
-    options[:to] = pages.to_i
-  end
 end.parse!
 
 if options[:url].empty?
-  abort 'URL or list of URLs is required.'
+  abort 'An URL or a list of URLs is required.'
 elsif options[:path].empty?
   abort 'Path is required.'
 end
 
 options[:url].each_with_index { |url, i|
   begin
-
-    host = options.has_key?(:profile) ? options[:profile] : URI.parse(url).host.split(?.)[-2]
     Dir.mkdir(options[:path][i]) unless File.directory? options[:path][i]
-    
-    if Dumper::Profiles::list.include? host.gsub(?-, ?_)
-      method = ('get_' + host.gsub(?-, ?_)).to_sym
-      if options.include?(:from) && options.include?(:to)
-        Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
-      else
-        Dumper::Profiles::send method, url, options[:path][i]
+
+    host = options[:profile] || URI.parse(url).host.split(?.)[-2]
+
+    if options[:xpath].nil?  && Dumper::Profiles::list.include?(host.gsub(?-, ?_))
+      method = "get_#{host.gsub ?-, ?_}".to_sym
+      case
+        when options[:from] && options[:to] then Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
+        when options[:from]                 then Dumper::Profiles::send method, url, options[:path][i], options[:from]
+        else                                     Dumper::Profiles::send method, url, options[:path][i]
       end
     else
       Dumper::Profiles::get_generic  url, options[:path][i], options[:xpath]
     end
-
   rescue Nokogiri::XML::XPath::SyntaxError => e
-    puts e.to_s.gsub(/expression/, 'xpath')
+    puts e.to_s.gsub /expression/, 'xpath'
     puts 'Cannot dump.'
-  rescue OpenURI::HTTPError => e
+  rescue OpenURI::HTTPError   => e
     puts "Error opening #{url}: #{e}" 
   rescue URI::InvalidURIError => e
     puts "URL #{url} is not valid: #{e}"

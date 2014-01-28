@@ -30,6 +30,7 @@ module Dumper
         gallery = JSON.parse open("#{url}?from=#{from}").read
 
         to -= from if to >= 1
+        
         gallery['objects'].reverse[0..to].each { |image|
           @pool.process {
             Dumper::Profiles.get path, image['image']
@@ -38,15 +39,17 @@ module Dumper
       end
     end
 
-    def self.get_multiplayer(url, path, from = 1, to = -1)
-      Multiplayer.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_multiplayer(url, path, from = 1, to = -1)
+        Multiplayer.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_multiplayer
-      { from: :enabled, to: :enabled, type: :images }
+      def info_multiplayer
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

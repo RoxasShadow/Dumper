@@ -38,15 +38,17 @@ module Dumper
       end
     end
 
-    def self.get_teca(url, path, from = 1, to = -1)
-      Teca.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_teca(url, path, from = 1, to = -1)
+        Teca.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_teca
-      { from: :enabled, to: :enabled, type: :images }
+      def info_teca
+        { from: :enabled, to: :enabled, type: :images }
+      end
     end
 
   end

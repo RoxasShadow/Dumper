@@ -22,31 +22,30 @@ module Dumper
 
     class YandeRe < Profile
       def dump(url, path, from, to)
-        ua  = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
-        ref = url
-
         from.upto(to) { |i|
           puts "--- Page #{i} ---"
 
-          Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => ua, 'Referer' => ref)).xpath('//a[@class="thumb"]/@href').each { |p|
+          Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::Profiles::USER_AGENT, 'Referer' => url)).xpath('//a[@class="thumb"]/@href').each { |p|
             @pool.process {
-              img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => ref)).at_xpath('//img[@id="image"]/@src').text
-              Dumper::Profiles.get path, img, ua, ref
+              img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => url)).at_xpath('//img[@id="image"]/@src').text
+              Dumper::Profiles.get path, img, { referer: url }
             }
           }
         }
       end
     end
 
-    def self.get_yande(url, path, from = 1, to = 1)
-      YandeRe.new { |p|
-        p.dump     url, path, from, to
-        p.shutdown
-      }
-    end
+    class << self
+      def get_yande(url, path, from = 1, to = 1)
+        YandeRe.new { |p|
+          p.dump     url, path, from, to
+          p.shutdown
+        }
+      end
 
-    def self.info_yande
-      { from: :enabled, to: :enabled, type: :pages }
+      def info_yande
+        { from: :enabled, to: :enabled, type: :pages }
+      end
     end
 
   end
