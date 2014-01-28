@@ -18,11 +18,11 @@ describe 'Dumper' do
     Dumper::Profiles.get_mangaeden url, @dir, 1, 2
 
     images = Dir["#{@dir}/*_Question/*"]
-    expect(images.length).to be 5
+    expect(images.length).to be 24
 
-    image = FastImage.size images.last
+    image = FastImage.size images.first
     expect(image).to         be_kind_of(Array)
 
-    expect(image.first).to   be 889
+    expect(image.first).to   be 899
   end
 end

@@ -14,11 +14,11 @@ describe 'Dumper' do
   end
 
   it 'dumps a gallery from deviantart' do
-    url = 'http://www.deviantart.com/digitalart/paintings/illustrations/conceptual/'
-    Dumper::Profiles.get_deviantart url, @dir, 1, 1
+    url = 'http://targete.deviantart.com/gallery/?offset=72'
+    Dumper::Profiles.get_deviantart url, @dir
 
     images = Dir["#{@dir}/*"]
-    expect(images.length).to be 32
+    expect(images.length).to be >= 20
 
     image = FastImage.size images.last
     expect(image).to         be_kind_of(Array)

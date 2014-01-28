@@ -29,7 +29,7 @@ module Dumper
             Nokogiri::HTML(open(url)).xpath('//a[@style="border:none; margin:2px;"]/@href').each { |u|
               urls << u if u.to_s.start_with? 'http://www.imagebam.com/image/'
             }
-          }.reverse[from..to].each { |p|
+          }[from..to].each { |p|
             Nokogiri::HTML(open(p)).xpath('//img[@onclick="scale(this);"]/@src').each { |u|
               @pool.process {
                 Dumper::Profiles.get path, u

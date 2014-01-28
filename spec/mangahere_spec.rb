@@ -10,7 +10,7 @@ describe 'Dumper' do
   end
 
   after do
-    #FileUtils.rm_r @dir
+    FileUtils.rm_r @dir
   end
 
   it 'dumps a manga from mangahere' do

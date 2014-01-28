@@ -23,11 +23,11 @@ module Dumper
     class YandeRe < Profile
       def dump(url, path, from, to)
         from.upto(to) { |i|
-          puts "--- Page #{i} ---"
+          puts "--- Page #{i} ---" if Dumper::Profiles.verbose?
 
           Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::Profiles::USER_AGENT, 'Referer' => url)).xpath('//a[@class="thumb"]/@href').each { |p|
             @pool.process {
-              img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => ua, 'Referer' => url)).at_xpath('//img[@id="image"]/@src').text
+              img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => Dumper::Profiles::USER_AGENT, 'Referer' => url)).at_xpath('//img[@id="image"]/@src').text
               Dumper::Profiles.get path, img, { referer: url }
             }
           }
