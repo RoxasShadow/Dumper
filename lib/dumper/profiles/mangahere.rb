@@ -36,16 +36,10 @@ module Dumper
           dir = File.join path, name.sanitize_filename
           Dir.mkdir(dir) unless File.directory? dir
 
-          option = Nokogiri::HTML(open(chapter)).xpath '//select[@class="wid60"]/option'
-          first  = option.first.text.to_i
-          last   = option.last.text.to_i
-
-          first.upto(last) { |i|
+          Nokogiri::HTML(open(chapter)).xpath('//select[@class="wid60"]/option').each { |q|
             @pool.process {
-              url = chapter.gsub(/\/[0-9]+\.html/, '') + i.to_s + '.html'
-
-              scan = Nokogiri::HTML(open(url)).xpath('//section[@id="viewer"]/a/img/@src')[0].to_s
-              Dumper::Profiles.get dir, scan, { filename: "#{i}.png" }
+              scan = Nokogiri::HTML(open(q['value'])).xpath('//section[@id="viewer"]/a/img/@src')[0].to_s
+              Dumper::Profiles.get dir, scan, { filename: "#{q.text}.png" }
             }
           }
         }

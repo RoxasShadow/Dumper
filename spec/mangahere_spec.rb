@@ -20,9 +20,9 @@ describe 'Dumper' do
     images = Dir["#{@dir}/*_2/*"]
     expect(images.length).to be 41
 
-    image = FastImage.size images.last
+    image = FastImage.size images.first
     expect(image).to         be_kind_of(Array)
 
-    expect(image.first).to   be 730
+    expect(image.first).to   be 453
   end
 end
