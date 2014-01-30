@@ -23,6 +23,6 @@ describe 'Dumper' do
     image = FastImage.size images.last
     expect(image).to         be_kind_of(Array)
 
-    expect(image.first).to   be 650
+    expect(image.first).to   be >= 300
   end
 end

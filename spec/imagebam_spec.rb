@@ -14,15 +14,15 @@ describe 'Dumper' do
   end
 
   it 'dumps a gallery from imagebam' do
-    url = 'http://www.imagebam.com/gallery/ab4f428e9eec0c70bc53b27cfb91d902/'
+    url = 'http://www.imagebam.com/gallery/sb7rsktifbm6h2lpz6einoq6mou3j57k/'
     Dumper::Profiles.get_imagebam url, @dir
 
     images = Dir["#{@dir}/*"]
-    expect(images.length).to be >= 94
+    expect(images.length).to be 67
 
     image = FastImage.size images.last
     expect(image).to         be_kind_of(Array)
 
-    expect(image.first).to   be 511
+    expect(image.first).to   be 626
   end
 end
