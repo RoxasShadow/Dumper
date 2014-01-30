@@ -5,8 +5,7 @@ Gem::Specification.new { |s|
   s.version       = Dumper::version
   s.author        = 'Giovanni Capuano'
   s.email         = 'webmaster@giovannicapuano.net'
-  s.homepage      = 'http://www.giovannicapuano.net'
-  s.platform      = Gem::Platform::RUBY
+  s.homepage      = 'https://github.com/RoxasShadow'
   s.summary       = 'Fetch and download image gallery.'
   s.description   = 'A dumper to download whole galleries from board like 4chan, imagebam, mangaeden, deviantart, etc.'
   s.licenses      = 'GPL-3'
