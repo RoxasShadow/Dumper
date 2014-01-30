@@ -9,6 +9,6 @@ gem 'thread'
 
 # spec
 gem 'rspec'
-gem 'rubysl'
+gem 'rubysl' if engine: 'rbx'
 gem 'fastimage'
 gem 'parallel_tests'
