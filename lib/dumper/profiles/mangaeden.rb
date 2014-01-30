@@ -33,19 +33,15 @@ module Dumper
           
           page = Nokogiri::HTML open("http://www.mangaeden.com#{p['href']}")
 
-          page.xpath('//img[@id="mainImg"]/@src').each { |r|
-            Dumper::Profiles.get dir, r, { filename: '1.png' }
-            i += 1
-          }
+          Dumper::Profiles.get dir, page.at_xpath('//img[@id="mainImg"]/@src'), { filename: '1.png' }
+          i += 1
           
           page.xpath('//a[@class="ui-state-default"]').each { |q|
-            next unless q.text.numeric?        
-            q = q['href']
+            next unless q.text.numeric?
 
-            Nokogiri::HTML(open("http://www.mangaeden.com#{q}")).xpath('//img[@id="mainImg"]/@src').each { |r|
+            Nokogiri::HTML(open("http://www.mangaeden.com#{q['href']}")).xpath('//img[@id="mainImg"]/@src').each { |r|
               @pool.process {
-                Dumper::Profiles.get dir, r, { filename: "#{i}.png" }
-                i += 1
+                Dumper::Profiles.get dir, r, { filename: "#{q.text.to_i}.png" }
               }
             }
           }
