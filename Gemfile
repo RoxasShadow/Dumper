@@ -9,5 +9,6 @@ gem 'thread'
 
 # spec
 gem 'rspec'
+gem 'rubysl'
 gem 'fastimage'
 gem 'parallel_tests'

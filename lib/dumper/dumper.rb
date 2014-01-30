@@ -75,7 +75,8 @@ module Dumper
       end
       
       def get(path, url, options = {})
-        url     = url.to_s
+        url    = url.to_s
+        errors = 0
         
         begin
           if url.start_with? 'data:image/'
@@ -111,9 +112,15 @@ module Dumper
             end
           end
         rescue Exception => e
-          p e
-          puts "Error downloading #{url}."
-          return false
+          if errors <= 3
+            errors += 1
+            sleep 3
+            retry
+          else
+            p e
+            puts "Error downloading #{url}."
+            return false
+          end
         end
         
         true

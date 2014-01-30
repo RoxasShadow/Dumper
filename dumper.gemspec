@@ -25,4 +25,5 @@ Gem::Specification.new { |s|
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'fastimage'
   s.add_development_dependency 'parallel_tests'
+  s.add_development_dependency 'rubysl' if RUBY_ENGINE = 'rbx''
 }
