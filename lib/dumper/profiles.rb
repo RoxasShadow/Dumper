@@ -19,32 +19,6 @@
 
 module Dumper
   module Profiles
-
-    class DeviantArt < Profile
-      def dump(url, path, from, to)
-        from -= 1
-        to   -= 1 if to >= 1
-
-        Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]')[from..to].each { |u|
-          @pool.process {
-            Dumper.get path, u['data-super-img']
-          }
-        }
-      end
-    end
-
-    class << self
-      def get_deviantart(url, path, from = 1, to = -1)
-        DeviantArt.new { |p|
-          p.dump     url, path, from, to
-          p.shutdown
-        }
-      end
-
-      def info_deviantart
-        { from: :enabled, to: :enabled, type: :images }
-      end
-    end
-
+    Profile = Dumper::Profile
   end
 end

@@ -28,11 +28,17 @@ require 'certified'
 require 'addressable/uri'
 require 'json'
 require 'thread/pool'
+require 'observer'
 
 require 'dumper/utils'
+require 'dumper/logger'
+require 'dumper/profile'
+require 'dumper/profiles'
 require 'dumper/dumper'
 require 'dumper/version'
 
 Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
 }
+
+Dumper.add_observer Dumper::Logger.new

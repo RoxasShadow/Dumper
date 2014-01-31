@@ -27,7 +27,7 @@ module Dumper
 
         Nokogiri::HTML(open(url)).xpath('//a[@class = "fileThumb"]/@href')[from..to].each { |p|
           @pool.process {
-            Dumper::Profiles.get path, "http:#{p}"
+            Dumper.get path, "http:#{p}"
           }
         }
       end

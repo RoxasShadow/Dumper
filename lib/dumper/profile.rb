@@ -18,33 +18,29 @@
 #++
 
 module Dumper
-  module Profiles
+  class Profile
+    include Dumper
+    include Observable
 
-    class DeviantArt < Profile
-      def dump(url, path, from, to)
-        from -= 1
-        to   -= 1 if to >= 1
+    def initialize(&block)
+      add_observer Dumper::Logger.new
+      
+      min = pool_size[:min]
+      max = pool_size[:max]
 
-        Nokogiri::HTML(open(url)).xpath('//a[@class="thumb"]')[from..to].each { |u|
-          @pool.process {
-            Dumper.get path, u['data-super-img']
-          }
-        }
-      end
+      @pool = Thread.pool min, max
+      changed
+      notify_observers error:  "Using #{min}:#{max || min} threads..."
+
+      instance_eval &block
     end
 
-    class << self
-      def get_deviantart(url, path, from = 1, to = -1)
-        DeviantArt.new { |p|
-          p.dump     url, path, from, to
-          p.shutdown
-        }
-      end
-
-      def info_deviantart
-        { from: :enabled, to: :enabled, type: :images }
-      end
+    def dump(url, path, *args)
+      raise NotImplementedError
     end
 
+    def shutdown
+      @pool.shutdown
+    end
   end
 end

@@ -33,7 +33,7 @@ module Dumper
         
         gallery['objects'].reverse[0..to].each { |image|
           @pool.process {
-            Dumper::Profiles.get path, image['image']
+            Dumper.get path, image['image']
           }
         }
       end

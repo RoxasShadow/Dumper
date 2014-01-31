@@ -27,7 +27,7 @@ module Dumper
 
         Nokogiri::HTML(open(url)).xpath('//a[@target="_blank"]/@href')[from..to].each { |p|
           @pool.process {
-            Dumper::Profiles.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
+            Dumper.get(path, p) if p.to_s.end_with?('jpg') || p.to_s.end_with?('png')
           }
         }
       end

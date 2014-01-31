@@ -39,7 +39,7 @@ module Dumper
           Nokogiri::HTML(open(chapter)).xpath('//select[@class="wid60"]/option').each { |q|
             @pool.process {
               scan = Nokogiri::HTML(open(q['value'])).xpath('//section[@id="viewer"]/a/img/@src')[0].to_s
-              Dumper::Profiles.get dir, scan, { filename: "#{q.text}.png" }
+              Dumper.get dir, scan, { filename: "#{q.text}.png" }
             }
           }
         }

@@ -27,7 +27,7 @@ module Dumper
           prefix = url.include?('idol.sankakucomplex') ? 'idol' : 'chan'
 
           from.upto(to) { |page|
-            u = url + "&page=#{page}"
+            u = "#{url}&page=#{page}"
             begin
               op = open u
             rescue Exception => e
@@ -37,13 +37,18 @@ module Dumper
 
             Nokogiri::HTML(op).xpath('//a/@href').each { |p|
               next unless p.to_s.start_with? '/post/show'
+              errors = 0
 
               @pool.process {
                 begin
                   img = Nokogiri::HTML(open("http://#{prefix}.sankakucomplex.com/#{p}")).at_xpath('//a[@itemprop="contentUrl"]/@href').to_s
-                  Dumper::Profiles.get path, img, { referer: u }
+                  Dumper.get path, img, { referer: u }
                 rescue Exception => e
-                  retry
+                  if errors <= 3
+                    sleep 3
+                    errors += 1
+                    retry
+                  end
                 end
               }
             }
@@ -58,7 +63,7 @@ module Dumper
             }
           }[from..to].each { |p|
             @pool.process {
-              Dumper::Profiles.get path, p, { referer: url }
+              Dumper.get path, p, { referer: url }
             }
           }
         end

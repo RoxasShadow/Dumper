@@ -28,12 +28,12 @@ Examples
 
 `dumper --help # show the help and all the available commands`
 
-`dumper -i 4chan # show all the info available for the given profile`
+`dumper --info 4chan # show all the info available for the given profile`
 
-`dumper -u "http://boards.4chan.org/wg/res/5280736" -p images --threads 1:4`
+`dumper --url "http://boards.4chan.org/wg/res/5280736" --path images --threads 1:4`
 
 `dumper --url "http://www.mangaeden.com/en-manga/nisekoi" --path nisekoi --from 3  --to 9`
 
-`dumper --url "http://www.mangaeden.com/en-manga/nisekoi" --path nisekoi --from 10 --to 10`
+`dumper --url "http://www.mangaeden.com/en-manga/nisekoi" --path nisekoi --from 10 --to 10 --output nisekoi.log`
 
 `dumper --file stuff.txt --silence # dump all the lines formatted in the "URL||PATH" way`

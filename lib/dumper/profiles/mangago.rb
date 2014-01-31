@@ -31,7 +31,7 @@ module Dumper
             url  = page.at_xpath('//a[@id="pic_container"]/@href').to_s
             scan = page.at_xpath('//img[@id="page1"]/@src').to_s[0..-3]
 
-            Dumper::Profiles.get path, scan, { referer: url, filename: "#{i}.#{scan.split(?.).last}" }
+            Dumper.get path, scan, { referer: url, filename: "#{i}.#{scan.split(?.).last}" }
           }
         }
       end

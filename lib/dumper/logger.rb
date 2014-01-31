@@ -18,37 +18,42 @@
 #++
 
 module Dumper
-  module Profiles
+  class Logger
 
-    class Booru < Profile
-      def dump(url, path, from, to)
-        page = 0
-        
-        from.upto(to) { |i|
-          changed
-          notify_observers status: "--- Page #{i} ---"
+    class << self
+      def redirect_on(where, file)
+        @@where = where
+        @@file  = !file || file.empty? ? 'dumper.log' : file
+      end
 
-          Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
-            @pool.process {
-              Dumper.get path, u.child.child['src'].gsub(/thumbs/, 'img').gsub(/thumbnails\//, 'images/').gsub(/thumbnail_/, '')
-            }
+      def log_on_file(file, data)
+        File.open(file, ?a) { |file|
+          data.each { |status, message|
+            file.puts status == :critical_error_dump ? message.inspect : message
           }
-          
-          page += 40
+        }
+      end
+
+      def log_on_screen(data)
+        data.each { |status, message|
+          if status == :critical_error_dump
+            p    message
+          else
+            puts message
+          end
         }
       end
     end
 
-    class << self
-      def get_booru(url, path, from = 1, to = 1)
-        Booru.new { |p|
-          p.dump     url, path, from, to
-          p.shutdown
-        }
-      end
+    def initialize
+      @@where = :screen
+    end
 
-      def info_booru
-        { from: :enabled, to: :enabled, type: :pages }
+    def update(data)
+      if @@where == :file
+        Logger.log_on_file @@file, data
+      else
+        Logger.log_on_screen(data) if Dumper.verbose?
       end
     end
 

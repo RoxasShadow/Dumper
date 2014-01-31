@@ -27,7 +27,7 @@ module Dumper
       
       Nokogiri::HTML(open(url)).xpath('//img[@class="attachment-medium"]/@src')[from..to].each { |p|
         @pool.process {
-          Dumper::Profiles.get path, p, { referer: url }
+          Dumper.get path, p, { referer: url }
         }
       }
       end

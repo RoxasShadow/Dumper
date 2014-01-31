@@ -32,7 +32,7 @@ module Dumper
           }
         }.reverse[from..to].each { |p|
           @pool.process {
-            Dumper::Profiles.get path, "#{url}/#{p}"
+            Dumper.get path, "#{url}/#{p}"
           }
         }
       end

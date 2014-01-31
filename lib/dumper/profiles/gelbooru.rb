@@ -25,11 +25,12 @@ module Dumper
         page = 0
         
         from.upto(to) { |i|
-          puts "--- Page #{i} now ---" if Dumper::Profiles.verbose?
+          changed
+          notify_observers status: "--- Page #{i} ---"
           
           Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|
             @pool.process {
-              Dumper::Profiles.get path, u.child.child['src'].gsub(/thumbnails/, 'images').gsub(/thumbnail_/, '')
+              Dumper.get path, u.child.child['src'].gsub(/thumbnails/, 'images').gsub(/thumbnail_/, '')
             }
           }
           

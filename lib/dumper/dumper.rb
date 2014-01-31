@@ -18,128 +18,126 @@
 #++
 
 module Dumper
-  module Profiles
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+  USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
 
-    class Profile
-      include Dumper::Profiles
+  def pool_size
+    {
+      min: @min || 4,
+      max: @max
+    }
+  end
 
-      def initialize(&block)
-        min = pool_size[:min]
-        max = pool_size[:max]
+  def verbose?
+    @verbose == nil || @verbose == true
+  end
+    alias_method :mute?, :verbose?
 
-        @pool = Thread.pool min, max
-        puts "Using #{min}:#{max || min} threads..."
+  def mute?
+    @verbose == false
+  end
+    alias_method :muted?, :mute?
 
-        instance_eval &block
-      end
+  class << self
+    include Observable
 
-      def dump(url, path, *args)
-        raise NotImplementedError
-      end
-
-      def shutdown
-        @pool.shutdown
-      end
+    def pool_size=(min, max = nil)
+      @min = min
+      @max = max
     end
 
-    def pool_size
-      {
-        min: @min || 4,
-        max: @max
-      }
+    def verbose=(verbose)
+      @verbose = verbose
     end
+
+    def shut_up!
+      @verbose == false
+    end
+      alias_method :mute!,   :shut_up!
+
+    def verbose!
+      @verbose == true
+    end
+      alias_method :unmute!, :verbose!
 
     def verbose?
       @verbose == nil || @verbose == true
     end
 
-    class << self
-      def pool_size=(min, max = nil)
-        @min = min
-        @max = max
-      end
-
-      def verbose=(verbose)
-        @verbose = verbose
-      end
-
-      def verbose?
-      @verbose == nil || @verbose == true
-      end
-
-      def list
-        Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map { |f|
-          f = File.basename(f).split(?.)[0]
-        }
-      end
-      
-      def get(path, url, options = {})
-        url    = url.to_s
-        errors = 0
-        
-        begin
-          if url.start_with? 'data:image/'
-            filename = File.join path, options[:filename] || rand(1000).to_s + '.' + url.split('data:image/')[1].split(?;)[0]
-            filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
-
-            url.gsub /data:image\/png;base64,/, ''
-
-            if File.exists? filename
-              puts "File #{filename} already exists."           if verbose?
-            else
-              puts "Downloading base64 image as #{filename}..." if verbose?
-              File.open(filename, 'wb') { |f|
-                f.write Base64.decode64(url)
-              }
-            end
-          else
-            filename = File.join path, options[:filename] || File.basename(url)
-            filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
-
-            if File.exists? filename
-              puts "File #{filename} already exists." if verbose?
-            else
-              filename = File.join(path, rand(1000).to_s + '.jpg') unless filename[-4] == ?. || filename[-5] == ?.
-              puts "Downloading #{url} as #{filename}..." if verbose?
-
-              File.open(filename, 'wb') { |f|
-                f.write open(url,
-                  'User-Agent' => options[:user_agent] || USER_AGENT,
-                  'Referer'    => options[:referer   ] || url
-                ).read
-              }
-            end
-          end
-        rescue Exception => e
-          if errors <= 3
-            errors += 1
-            sleep 3
-            retry
-          else
-            p e
-            puts "Error downloading #{url}."
-            return false
-          end
-        end
-        
-        true
-      end
-
-      def get_generic(url, path, xpath)
-        uri = nil
-        Nokogiri::HTML(open(url)).xpath(xpath).each { |p|
-          if p.to_s.start_with? ?/
-            uri = URI(url) if uri.nil?
-            p   = "#{uri.scheme}://#{uri.host}#{p}"
-          end
-          get path, p
-        }
-      end
+    def list
+      Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map { |f|
+        f = File.basename(f).split(?.)[0]
+      }
     end
     
-    def method_missing(method, *args, &block)
-      "'#{method.split('get_')[1]}' profile not found."
+    def get(path, url, options = {})
+      url    = url.to_s
+      errors = 0
+      
+      begin
+        if url.start_with? 'data:image/'
+          filename = File.join path, options[:filename] || rand(1000).to_s + '.' + url.split('data:image/')[1].split(?;)[0]
+          filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
+
+          url.gsub /data:image\/png;base64,/, ''
+
+          if File.exists? filename
+            changed
+            notify_observers error:  "File #{filename} already exists."
+          else
+            changed
+            notify_observers status: "Downloading base64 image as #{filename}..."
+            File.open(filename, 'wb') { |f|
+              f.write Base64.decode64(url)
+            }
+          end
+        else
+          filename = File.join path, options[:filename] || File.basename(url)
+          filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
+
+          if File.exists? filename
+            changed
+            notify_observers error:  "File #{filename} already exists."
+          else
+            filename = File.join(path, rand(1000).to_s + '.jpg') unless filename[-4] == ?. || filename[-5] == ?.
+            changed
+            notify_observers status: "Downloading #{url} as #{filename}..."
+
+            File.open(filename, 'wb') { |f|
+              f.write open(url,
+                'User-Agent' => options[:user_agent] || USER_AGENT,
+                'Referer'    => options[:referer   ] || url
+              ).read
+            }
+          end
+        end
+      rescue Exception => e
+        if errors <= 3
+          errors += 1
+          sleep 3
+          retry
+        else
+          changed
+          notify_observers critical_error: "Error downloading #{url}.", critical_error_dump: e
+          return false
+        end
+      end
+      
+      true
     end
+
+    def get_generic(url, path, xpath)
+      uri = nil
+      Nokogiri::HTML(open(url)).xpath(xpath).each { |p|
+        if p.to_s.start_with? ?/
+          uri = URI(url) if uri.nil?
+          p   = "#{uri.scheme}://#{uri.host}#{p}"
+        end
+        get path, p
+      }
+    end
+  end
+  
+  def method_missing(method, *args, &block)
+    "'#{method.split('get_')[1]}' profile not found."
   end
 end

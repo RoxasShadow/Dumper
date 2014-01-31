@@ -32,7 +32,7 @@ module Dumper
           }[from..to].each { |p|
             Nokogiri::HTML(open(p)).xpath('//img[@onclick="scale(this);"]/@src').each { |u|
               @pool.process {
-                Dumper::Profiles.get path, u
+                Dumper.get path, u
               }
             }
           }

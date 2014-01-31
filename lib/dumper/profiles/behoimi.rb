@@ -23,9 +23,9 @@ module Dumper
     class Behoimi < Profile
       def dump(url, path, from, to)
         from.upto(to) { |i|
-          Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::Profiles::USER_AGENT, 'Referer' => url)).xpath('//img[@class="preview    "]/@src').each { |p|
+          Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).xpath('//img[@class="preview    "]/@src').each { |p|
             @pool.process {
-              Dumper::Profiles.get path, p.to_s.gsub('preview/', ''), { referer: url }
+              Dumper.get path, p.to_s.gsub('preview/', ''), { referer: url }
             }
           }
         }

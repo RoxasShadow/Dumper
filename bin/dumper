@@ -27,14 +27,14 @@ OptionParser.new do |o|
   
   o.on '-l', '--list',            'Show available profiles' do
     abort 'Profiles available:'.tap { |s|
-      Dumper::Profiles::list.sort { |a, b| a <=> b }.each { |p| s << "\n" + (' ' * 3) + p }
+      Dumper.list.sort { |a, b| a <=> b }.each { |p| s << "\n" + (' ' * 3) + p }
     } if ARGV.empty?
   end
 
   o.on '-i', '--info PROFILE',    'Get info about profiles' do |profile|
-    if Dumper::Profiles::list.include? profile
+    if Dumper::Profiles.list.include? profile
       method = ("info_#{profile}").to_sym      
-      Dumper::Profiles::send(method).tap { |i|
+      Dumper::Profiles.send(method).tap { |i|
         puts "Option 'from' is #{i[:from] ? 'available' : 'not available'}."
         puts "Option 'to'   is #{i[:to]   ? 'available' : 'not available'}."
         abort "It dumps #{i[:type]}."
@@ -48,11 +48,11 @@ OptionParser.new do |o|
     options[:url]    << url
   end
   
-  o.on '-o', '--from PAGE',       'Start to save from... (if allowed)' do |pages|
+  o.on '-f', '--from PAGE',       'Start to save from... (if allowed)' do |pages|
     options[:from]    = pages.to_i
   end
   
-  o.on '-g', '--to PAGE',         'Finish to save at... (if allowed)'  do |pages|
+  o.on '-t', '--to PAGE',         'Finish to save at... (if allowed)'  do |pages|
     options[:to]      = pages.to_i
   end
   
@@ -70,14 +70,18 @@ OptionParser.new do |o|
   
   o.on '-t', '--threads MIN:MAX',  'Set the number of threads to use'   do |threads|
     threads = threads.split ?:
-    Dumper::Profiles.pool_size = threads[0].to_i, threads[1].to_i
+    Dumper.pool_size = threads[0].to_i, threads[1].to_i
   end
   
-  o.on '-s', '--silence',         'Print only important messages' do
-    Dumper::Profiles.verbose = false
+  o.on '-m', '--silence',          'Print only important messages'    do
+    Dumper.shut_up!
   end
   
-  o.on '-f', '--file FILE',       'File containing in each line "URL||Folder"' do |file|
+  o.on '-o', '--output ',          'Print the logs on the given file' do |file|
+    Dumper::Logger.redirect_on :file, file
+  end
+  
+  o.on '-s', '--file FILE',       'File containing in each line "URL||Folder"' do |file|
     file = File.open(file).read.gsub(/\r\n?/, "\n")
     file.each_line { |line|
       split              = line.split '||'
@@ -99,15 +103,15 @@ options[:url].each_with_index { |url, i|
 
     host = options[:profile] || URI.parse(url).host.split(?.)[-2]
 
-    if options[:xpath].nil?  && Dumper::Profiles::list.include?(host.gsub(?-, ?_))
+    if options[:xpath].nil?  && Dumper.list.include?(host.gsub(?-, ?_))
       method = "get_#{host.gsub ?-, ?_}".to_sym
       case
-        when options[:from] && options[:to] then Dumper::Profiles::send method, url, options[:path][i], options[:from], options[:to]
-        when options[:from]                 then Dumper::Profiles::send method, url, options[:path][i], options[:from]
-        else                                     Dumper::Profiles::send method, url, options[:path][i]
+        when options[:from] && options[:to] then Dumper::Profiles.send method, url, options[:path][i], options[:from], options[:to]
+        when options[:from]                 then Dumper::Profiles.send method, url, options[:path][i], options[:from]
+        else                                     Dumper::Profiles.send method, url, options[:path][i]
       end
     else
-      Dumper::Profiles::get_generic  url, options[:path][i], options[:xpath]
+      Dumper::Profiles.get_generic  url, options[:path][i], options[:xpath]
     end
   rescue Nokogiri::XML::XPath::SyntaxError => e
     puts e.to_s.gsub /expression/, 'xpath'

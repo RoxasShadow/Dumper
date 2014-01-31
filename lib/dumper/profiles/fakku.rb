@@ -28,13 +28,14 @@ module Dumper
         cdn = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
 
         from.upto(to) { |i|
-          return if errors == 10
+          return if errors == 3
           
           file     = "%03d.jpg" % i
           filename =  "#{cdn}#{file}"
 
           @pool.process {
-            unless Dumper::Profiles.get path, URI.parse(URI.encode(filename, '[]')), { referer: url }
+            unless Dumper.get path, URI.parse(URI.encode(filename, '[]')), { referer: url }
+              sleep 3
               errors += 1
               
               file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
