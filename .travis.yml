@@ -10,8 +10,8 @@ rvm:
 matrix:
   allow_failure:
     rvm:
-      - rvm: rbx
-      - rvm: jruby
+      - rbx
+      - jruby
 
 notifications:
   irc: 'irc.rizon.net#aggvistnurummor'
