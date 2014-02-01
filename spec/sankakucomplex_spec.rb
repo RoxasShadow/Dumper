@@ -31,7 +31,7 @@ describe 'Dumper' do
     Dumper::Profiles.get_sankakucomplex url, @dir
 
     images = Dir["#{@dir}/*"]
-    expect(images.length).to be 20
+    expect(images.length).to be >= 20
 
     image = FastImage.size images.last
     expect(image).to         be_kind_of(Array)
