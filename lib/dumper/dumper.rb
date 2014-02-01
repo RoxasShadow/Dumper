@@ -38,7 +38,7 @@ module Dumper
     alias_method :muted?, :mute?
 
   class << self
-    include Observable
+    include Alakazam
 
     def pool_size=(min, max = nil)
       @min = min
@@ -81,10 +81,8 @@ module Dumper
           url.gsub /data:image\/png;base64,/, ''
 
           if File.exists? filename
-            changed
             notify_observers error:  "File #{filename} already exists."
           else
-            changed
             notify_observers status: "Downloading base64 image as #{filename}..."
             File.open(filename, 'wb') { |f|
               f.write Base64.decode64(url)
@@ -95,11 +93,9 @@ module Dumper
           filename.gsub! File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR
 
           if File.exists? filename
-            changed
             notify_observers error:  "File #{filename} already exists."
           else
             filename = File.join(path, rand(1000).to_s + '.jpg') unless filename[-4] == ?. || filename[-5] == ?.
-            changed
             notify_observers status: "Downloading #{url} as #{filename}..."
 
             File.open(filename, 'wb') { |f|
@@ -116,7 +112,6 @@ module Dumper
           sleep 3
           retry
         else
-          changed
           notify_observers critical_error: "Error downloading #{url}.", critical_error_dump: e
           return false
         end

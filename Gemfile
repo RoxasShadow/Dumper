@@ -6,6 +6,7 @@ gem 'certified'
 gem 'addressable'
 gem 'json'
 gem 'thread'
+gem 'alakazam'
 
 # spec
 gem 'rspec'

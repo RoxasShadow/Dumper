@@ -25,7 +25,6 @@ module Dumper
         page = 0
         
         from.upto(to) { |i|
-          changed
           notify_observers status: "--- Page #{i} ---"
           
           Nokogiri::HTML(open("#{url}&pid=#{page}")).xpath('//span[@class="thumb"]').each { |u|

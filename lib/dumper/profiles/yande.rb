@@ -23,7 +23,6 @@ module Dumper
     class YandeRe < Profile
       def dump(url, path, from, to)
         from.upto(to) { |i|
-          changed
           notify_observers status: "--- Page #{i} ---"
 
           Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).xpath('//a[@class="thumb"]/@href').each { |p|

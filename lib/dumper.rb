@@ -28,7 +28,7 @@ require 'certified'
 require 'addressable/uri'
 require 'json'
 require 'thread/pool'
-require 'observer'
+require 'alakazam'
 
 require 'dumper/utils'
 require 'dumper/logger'
@@ -41,4 +41,4 @@ Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
 }
 
-Dumper.add_observer Dumper::Logger.new
+Dumper.is_observed_by Dumper::Logger.new, when_change: false

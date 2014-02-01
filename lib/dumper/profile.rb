@@ -20,7 +20,7 @@
 module Dumper
   class Profile
     include Dumper
-    include Observable
+    include Alakazam
 
     def initialize(&block)
       add_observer Dumper::Logger.new
@@ -29,7 +29,6 @@ module Dumper
       max = pool_size[:max]
 
       @pool = Thread.pool min, max
-      changed
       notify_observers error:  "Using #{min}:#{max || min} threads..."
 
       instance_eval &block
