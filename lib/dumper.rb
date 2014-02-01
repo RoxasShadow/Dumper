@@ -41,4 +41,4 @@ Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
 }
 
-Dumper.is_observed_by Dumper::Logger.new, when_change: false
+Dumper.is_observed_by Dumper::Logger.new, on_fire: false
