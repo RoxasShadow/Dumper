@@ -111,7 +111,7 @@ options[:url].each_with_index { |url, i|
         else                                     Dumper::Profiles.send method, url, options[:path][i]
       end
     else
-      Dumper::Profiles.get_generic  url, options[:path][i], options[:xpath]
+      Dumper.get_generic  url, options[:path][i], options[:xpath]
     end
   rescue Nokogiri::XML::XPath::SyntaxError => e
     puts e.to_s.gsub /expression/, 'xpath'
