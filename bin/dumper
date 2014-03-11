@@ -32,7 +32,7 @@ OptionParser.new do |o|
   end
 
   o.on '-i', '--info PROFILE',    'Get info about profiles' do |profile|
-    if Dumper::Profiles.list.include? profile
+    if Dumper.list.include? profile
       method = ("info_#{profile}").to_sym      
       Dumper::Profiles.send(method).tap { |i|
         puts "Option 'from' is #{i[:from] ? 'available' : 'not available'}."
