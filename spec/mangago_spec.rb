@@ -18,10 +18,10 @@ describe 'Dumper' do
     Dumper::Profiles.get_mangago url, @dir
 
     images = Dir["#{@dir}/*"]
-    expect(images.length).to be >= 21
+    expect(images.length).to be >= 20
 
     image = FastImage.size images.last
-    expect(image).to         be_kind_of(Array)
+    expect(image).to       be_kind_of(Array)
 
     expect(image.last).to    be 1300
   end
