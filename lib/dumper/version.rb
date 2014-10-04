@@ -19,6 +19,6 @@
 
 module Dumper
   def self.version
-    '0.7.4'
+    '0.7.5'
   end
 end

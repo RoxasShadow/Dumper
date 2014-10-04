@@ -37,6 +37,8 @@ require 'dumper/profiles'
 require 'dumper/dumper'
 require 'dumper/version'
 
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
 Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
 }
