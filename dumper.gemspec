@@ -15,15 +15,16 @@ Gem::Specification.new { |s|
   s.executables   = 'dumper'
   s.test_files    = Dir.glob('spec/**/*_spec.rb')
 
-  s.add_dependency 'nokogiri'
-  s.add_dependency 'certified'
-  s.add_dependency 'addressable'
-  s.add_dependency 'json'
-  s.add_dependency 'thread'
-  s.add_dependency 'alakazam'
+  s.add_dependency 'nokogiri',    '~> 1.6'
+  s.add_dependency 'certified',   '~> 1.0'
+  s.add_dependency 'addressable', '~> 2.3'
+  s.add_dependency 'iconv',       '~> 1.0'
+  s.add_dependency 'json',        '~> 1.8'
+  s.add_dependency 'thread',      '~> 0.1'
+  s.add_dependency 'alakazam',    '~> 0.4'
 
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'fastimage'
-  s.add_development_dependency 'parallel_tests'
+  s.add_development_dependency 'rake',           '~> 10.3'
+  s.add_development_dependency 'rspec',          '~> 3.1'
+  s.add_development_dependency 'fastimage',      '~> 1.6'
+  s.add_development_dependency 'parallel_tests', '~> 1.0'
 }

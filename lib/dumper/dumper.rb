@@ -100,6 +100,7 @@ module Dumper
 
             File.open(filename, 'wb') { |f|
               f.write open(url,
+                ssl_verify: OpenSSL::SSL::VERIFY_NONE,
                 'User-Agent' => options[:user_agent] || USER_AGENT,
                 'Referer'    => options[:referer   ] || url
               ).read
