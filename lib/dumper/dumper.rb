@@ -52,7 +52,7 @@ module Dumper
     def shut_up!
       @verbose == false
     end
-      alias_method :mute!,   :shut_up!
+      alias_method :mute!, :shut_up!
 
     def verbose!
       @verbose == true
@@ -64,15 +64,15 @@ module Dumper
     end
 
     def list
-      Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map { |f|
+      Dir.glob(File.expand_path('../profiles/*.rb', __FILE__)).sort { |a, b| b <=> a }.map do |f|
         f = File.basename(f).split(?.)[0]
-      }
+      end
     end
-    
+
     def get(path, url, options = {})
       url    = url.to_s
       errors = 0
-      
+
       begin
         if url.start_with? 'data:image/'
           filename = File.join path, options[:filename] || rand(1000).to_s + '.' + url.split('data:image/')[1].split(?;)[0]
@@ -81,12 +81,10 @@ module Dumper
           url.gsub /data:image\/png;base64,/, ''
 
           if File.exists? filename
-            notify_observers error:  "File #{filename} already exists."
+            notify_observers error: "File #{filename} already exists."
           else
             notify_observers status: "Downloading base64 image as #{filename}..."
-            File.open(filename, 'wb') { |f|
-              f.write Base64.decode64(url)
-            }
+            File.open(filename, 'wb') { |f| f.write Base64.decode64(url) }
           end
         else
           filename = File.join path, options[:filename] || File.basename(url)
@@ -98,13 +96,20 @@ module Dumper
             filename = File.join(path, rand(1000).to_s + '.jpg') unless filename[-4] == ?. || filename[-5] == ?.
             notify_observers status: "Downloading #{url} as #{filename}..."
 
-            File.open(filename, 'wb') { |f|
-              f.write open(url,
-                ssl_verify: OpenSSL::SSL::VERIFY_NONE,
-                'User-Agent' => options[:user_agent] || USER_AGENT,
-                'Referer'    => options[:referer   ] || url
-              ).read
+            url.prepend('http:') if url.start_with?('//')
+            uri = URI(url)
+            http_options = {
+              'User-Agent' => options[:user_agent] || USER_AGENT,
+              'Referer'    => options[:referer   ] || url
             }
+
+            http = Net::HTTP.start(uri.host, uri.port)
+            http.use_ssl = uri.scheme == 'https'
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+            File.open(filename, 'wb') do |f|
+              f.write http.get(uri.path, http_options).body
+            end
           end
         end
       rescue Exception => e
@@ -117,22 +122,23 @@ module Dumper
           return false
         end
       end
-      
+
       true
     end
 
     def get_generic(url, path, xpath)
       uri = nil
-      Nokogiri::HTML(open(url)).xpath(xpath).each { |p|
+      Nokogiri::HTML(open(url)).xpath(xpath).each do |p|
         if p.to_s.start_with? ?/
           uri = URI(url) if uri.nil?
           p   = "#{uri.scheme}://#{uri.host}#{p}"
         end
+
         get path, p
-      }
+      end
     end
   end
-  
+
   def method_missing(method, *args, &block)
     "'#{method.split('get_')[1]}' profile not found."
   end

@@ -23,7 +23,7 @@ module Dumper
     class Booru < Profile
       def dump(url, path, from, to)
         page = 0
-        
+
         from.upto(to) { |i|
           notify_observers status: "--- Page #{i} ---"
 
@@ -32,7 +32,7 @@ module Dumper
               Dumper.get path, u.child.child['src'].gsub(/thumbs/, 'img').gsub(/thumbnails\//, 'images/').gsub(/thumbnail_/, '')
             }
           }
-          
+
           page += 40
         }
       end

@@ -35,13 +35,13 @@ module Dumper
       end
 
       def log_on_screen(data)
-        data.each { |status, message|
+        data.each do |status, message|
           if status == :critical_error_dump
-            p    message
+            p message
           else
             puts message
           end
-        }
+        end
       end
     end
 

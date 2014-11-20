@@ -24,12 +24,12 @@ module Dumper
       def dump(url, path, from, to)
         url    += '/read' unless url.end_with? '/read'
         errors = 0
-        
+
         cdn = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
 
         from.upto(to) { |i|
           return if errors == 3
-          
+
           file     = "%03d.jpg" % i
           filename =  "#{cdn}#{file}"
 
@@ -37,7 +37,7 @@ module Dumper
             unless Dumper.get path, URI.parse(URI.encode(filename, '[]')), { referer: url }
               sleep 3
               errors += 1
-              
+
               file = File.join(path, file).gsub(File::SEPARATOR, File::ALT_SEPARATOR || File::SEPARATOR)
               File.delete(file) if File.exists? file
             end

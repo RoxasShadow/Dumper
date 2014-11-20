@@ -37,8 +37,8 @@ require 'dumper/profiles'
 require 'dumper/dumper'
 require 'dumper/version'
 
-Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each { |f|
+Dir.glob(File.expand_path("../dumper/profiles/*.rb", __FILE__)).each do |f|
   require "dumper/profiles/#{File.basename(f).split(?.)[0]}"
-}
+end
 
 Dumper.is_observed_by Dumper::Logger.new, on_fire: false
