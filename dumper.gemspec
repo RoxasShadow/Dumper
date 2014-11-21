@@ -22,7 +22,7 @@ Gem::Specification.new { |s|
   s.add_dependency 'json',        '~> 1.8'
   s.add_dependency 'thread',      '~> 0.1'
   s.add_dependency 'alakazam',    '~> 0.4'
-  s.add_dependency 'httparty',    '~> 0.13.3'
+  s.add_dependency 'httparty',    '~> 0.13'
 
   s.add_development_dependency 'rake',           '~> 10.3'
   s.add_development_dependency 'rspec',          '~> 3.1'
