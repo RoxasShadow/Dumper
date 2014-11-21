@@ -97,18 +97,16 @@ module Dumper
             notify_observers status: "Downloading #{url} as #{filename}..."
 
             url.prepend('http:') if url.start_with?('//')
-            uri = URI(url)
             http_options = {
-              'User-Agent' => options[:user_agent] || USER_AGENT,
-              'Referer'    => options[:referer   ] || url
+              headers: {
+                'User-Agent' => options[:user_agent] || USER_AGENT,
+                'Referer'    => options[:referer   ] || url
+              },
+              verify: false
             }
 
-            http = Net::HTTP.start(uri.host, uri.port)
-            http.use_ssl = uri.scheme == 'https'
-            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
             File.open(filename, 'wb') do |f|
-              f.write http.get(uri.path, http_options).body
+              response = HTTParty.get(url, http_headers).parsed_response
             end
           end
         end

@@ -8,6 +8,7 @@ gem 'iconv'
 gem 'json'
 gem 'thread'
 gem 'alakazam'
+gem 'httparty'
 
 # spec
 gem 'rspec'
