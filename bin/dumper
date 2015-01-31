@@ -57,7 +57,7 @@ OptionParser.new do |o|
   end
   
   o.on '-p', '--path PATH',       'Target folder'      do |path|
-    options[:path]   << path
+    options[:path]   << File.expand_path(path)
   end
   
   o.on '-x', '--xpath XPATH',     'Use a custom xpath' do |xpath|
