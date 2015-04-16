@@ -1,5 +1,5 @@
 #--
-# Copyright(C) 2013 Giovanni Capuano <webmaster@giovannicapuano.net>
+# Copyright(C) 2015 Giovanni Capuano <webmaster@giovannicapuano.net>
 #
 # This file is part of Dumper.
 #
@@ -27,11 +27,11 @@ module Dumper
       end
 
       def log_on_file(file, data)
-        File.open(file, ?a) { |file|
-          data.each { |status, message|
+        File.open(file, ?a) do |file|
+          data.each do |status, message|
             file.puts status == :critical_error_dump ? message.inspect : message
-          }
-        }
+          end
+        end
       end
 
       def log_on_screen(data)

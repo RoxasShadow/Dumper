@@ -1,5 +1,5 @@
 #--
-# Copyright(C) 2013 Giovanni Capuano <webmaster@giovannicapuano.net>
+# Copyright(C) 2015 Giovanni Capuano <webmaster@giovannicapuano.net>
 #
 # This file is part of Dumper.
 #
@@ -18,7 +18,7 @@
 #++
 
 module Dumper
-  USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0'
+  USER_AGENT = 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0'
 
   def pool_size
     {
@@ -94,21 +94,26 @@ module Dumper
             notify_observers error:  "File #{filename} already exists."
           else
             filename = File.join(path, rand(1000).to_s + '.jpg') unless filename[-4] == ?. || filename[-5] == ?.
-            notify_observers status: "Downloading #{url} as #{filename}..."
 
-            url.prepend('http:') if url.start_with?('//')
-            uri = URI(url)
             http_options = {
               'User-Agent' => options[:user_agent] || USER_AGENT,
               'Referer'    => options[:referer   ] || url
             }
 
-            http = Net::HTTP.start(uri.host, uri.port)
+            url.prepend('http:') if url.start_with?('//')
+            uri = URI(url)
+
+            http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = uri.scheme == 'https'
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-            File.open(filename, 'wb') do |f|
-              f.write http.get(uri.path, http_options).body
+            http.start do |h|
+              notify_observers status: "Downloading #{url} as #{filename}..."
+              response = h.request Net::HTTP::Get.new(uri.request_uri, http_options)
+
+              File.open(filename, 'wb') do |f|
+                f.write response.body
+              end
             end
           end
         end
