@@ -14,7 +14,7 @@ describe 'Dumper' do
   end
 
   it 'dumps a page from teca' do
-    url = 'http://alfateam123.niggazwithattitu.de/screens/anime_screens/sakura%20trick/index.html'
+    url = 'https://alfateam123.nwa.xyz/screens/anime_screens/sakura%20trick/index.html'
     Dumper::Profiles.get_teca url, @dir, 1, 4
 
     images = Dir["#{@dir}/*"]
