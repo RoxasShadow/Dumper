@@ -18,13 +18,14 @@
 # along with Dumper.  If not, see <http://www.gnu.org/licenses/>.
 #++
 require 'dumper'
+require 'optparse'
 
 options = {}
 
 OptionParser.new do |o|
   options[:url ] = []
   options[:path] = []
-  
+
   o.on '-l', '--list',            'Show available profiles' do
     abort 'Profiles available:'.tap { |s|
       Dumper.list.sort { |a, b| a <=> b }.each { |p| s << "\n" + (' ' * 3) + p }
@@ -33,7 +34,7 @@ OptionParser.new do |o|
 
   o.on '-i', '--info PROFILE',    'Get info about profiles' do |profile|
     if Dumper.list.include? profile
-      method = ("info_#{profile}").to_sym      
+      method = ("info_#{profile}").to_sym
       Dumper::Profiles.send(method).tap { |i|
         puts "Option 'from' is #{i[:from] ? 'available' : 'not available'}."
         puts "Option 'to'   is #{i[:to]   ? 'available' : 'not available'}."
@@ -43,44 +44,44 @@ OptionParser.new do |o|
       abort 'Profile not found.'
     end
   end
-  
+
   o.on '-u', '--url URL',         'Target URL'    do |url|
     options[:url]    << url
   end
-  
+
   o.on '-f', '--from PAGE',       'Start to save from... (if allowed)' do |pages|
     options[:from]    = pages.to_i
   end
-  
+
   o.on '-t', '--to PAGE',         'Finish to save at... (if allowed)'  do |pages|
     options[:to]      = pages.to_i
   end
-  
+
   o.on '-p', '--path PATH',       'Target folder'      do |path|
     options[:path]   << File.expand_path(path)
   end
-  
+
   o.on '-x', '--xpath XPATH',     'Use a custom xpath' do |xpath|
     options[:xpath]   = xpath
   end
-  
+
   o.on '-r', '--profile PROFILE', 'Force the use of the given profile' do |profile|
     options[:profile] = profile
   end
-  
+
   o.on '-t', '--threads MIN:MAX',  'Set the number of threads to use'   do |threads|
     threads = threads.split ?:
     Dumper.pool_size = threads[0].to_i, threads[1].to_i
   end
-  
+
   o.on '-m', '--silence',          'Print only important messages'    do
     Dumper.shut_up!
   end
-  
+
   o.on '-o', '--output ',          'Print the logs on the given file' do |file|
     Dumper::Logger.redirect_on :file, file
   end
-  
+
   o.on '-s', '--file FILE',       'File containing in each line "URL||Folder"' do |file|
     file = File.open(file).read.gsub(/\r\n?/, "\n")
     file.each_line { |line|
@@ -103,21 +104,26 @@ options[:url].each_with_index { |url, i|
 
     host = options[:profile] || URI.parse(url).host.split(?.)[-2]
 
-    if options[:xpath].nil?  && Dumper.list.include?(host.gsub(?-, ?_))
-      method = "get_#{host.gsub ?-, ?_}".to_sym
-      case
-        when options[:from] && options[:to] then Dumper::Profiles.send method, url, options[:path][i], options[:from], options[:to]
-        when options[:from]                 then Dumper::Profiles.send method, url, options[:path][i], options[:from]
-        else                                     Dumper::Profiles.send method, url, options[:path][i]
+    if Dumper.list.include?(host.gsub(?-, ?_))
+      if options[:xpath].nil?
+        method = "get_#{host.gsub ?-, ?_}".to_sym
+
+        case
+          when options[:from] && options[:to] then Dumper::Profiles.send method, url, options[:path][i], options[:from], options[:to]
+          when options[:from]                 then Dumper::Profiles.send method, url, options[:path][i], options[:from]
+          else                                     Dumper::Profiles.send method, url, options[:path][i]
+        end
+      else
+        Dumper.get_generic  url, options[:path][i], options[:xpath]
       end
     else
-      Dumper.get_generic  url, options[:path][i], options[:xpath]
+      puts 'Cannot find any profile for your source. Consider using `--profile` or `--xpath`.'
     end
   rescue Nokogiri::XML::XPath::SyntaxError => e
     puts e.to_s.gsub /expression/, 'xpath'
     puts 'Cannot dump.'
   rescue OpenURI::HTTPError   => e
-    puts "Error opening #{url}: #{e}" 
+    puts "Error opening #{url}: #{e}"
   rescue URI::InvalidURIError => e
     puts "URL #{url} is not valid: #{e}"
   end

@@ -20,7 +20,6 @@
 require 'open-uri'
 require 'net/http'
 require 'uri'
-require 'optparse'
 require 'base64'
 require 'nokogiri'
 require 'openssl'
