@@ -21,7 +21,7 @@ class String
   def numeric?
     self.to_i.to_s == self || self.to_f.to_s == self
   end
-  
+
   def sanitize_filename
     self.split(/(?<=.)\.(?=[^.])(?!.*\.[^.])/m).map { |s| s.gsub /[^a-z0-9\-]+/i, ?_ }.join(?.)
   end
@@ -30,11 +30,11 @@ end
 class NilClass
   def numeric?
     false
-  end  
+  end
 end
 
 class URI::Parser
-  def split url
+  def split(url)
     a = Addressable::URI::parse url
     [a.scheme, a.userinfo, a.host, a.port, nil, a.path, nil, a.query, a.fragment]
   end
