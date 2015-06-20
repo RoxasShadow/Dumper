@@ -21,7 +21,8 @@ Gem::Specification.new { |s|
   s.add_dependency 'iconv',       '~> 1.0'
   s.add_dependency 'json',        '~> 1.8'
   s.add_dependency 'thread',      '~> 0.1'
-  s.add_dependency 'rainbow',     '~> 1.1'
+  s.add_dependency 'rainbow',     '~> 1.1',  '1.1.4'
+  s.add_dependency 'thor',        '~> 0.19', '0.19.1'
   s.add_dependency 'alakazam',    '~> 0.4'
 
   s.add_development_dependency 'rake',           '~> 10.3'
