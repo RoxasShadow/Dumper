@@ -117,7 +117,8 @@ options[:url].each_with_index { |url, i|
         Dumper.get_generic  url, options[:path][i], options[:xpath]
       end
     else
-      puts 'Cannot find any profile for your source. Consider using `--profile` or `--xpath`.'
+      puts 'Cannot find any profile for your source.'
+      puts 'Consider using `--profile` or `--xpath`.'
     end
   rescue Nokogiri::XML::XPath::SyntaxError => e
     puts e.to_s.gsub /expression/, 'xpath'
