@@ -1,5 +1,5 @@
 #--
-# Copyright(C) 2013 Giovanni Capuano <webmaster@giovannicapuano.net>
+# Copyright(C) 2015 Giovanni Capuano <webmaster@giovannicapuano.net>
 #
 # This file is part of Dumper.
 #
@@ -25,8 +25,11 @@ module Dumper
         url    += '/read' unless url.end_with? '/read'
         errors = 0
 
-        cdn = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
+        js_thumbs_slice = open(url).read.split('window.params.thumbs')[1].split('\/thumbs\/')
+        thumbs_count    = js_thumbs_slice[1..-1].count
+        cdn             = js_thumbs_slice[0].gsub(/\\\//m, ?/)[5..-1] + '/images/'
 
+        to = thumbs_count if to > thumbs_count
         from.upto(to) { |i|
           return if errors == 3
 
