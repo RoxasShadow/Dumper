@@ -27,8 +27,10 @@ module Dumper
 
           Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).xpath('//a[@class="thumb"]/@href').each { |p|
             @pool.process {
-              img_url = 'https://' + URI.parse(url).hostname + p
-              img     = Nokogiri::HTML(open(img_url, 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).at_xpath('//img[@id="image"]/@src').text
+              img = Nokogiri::HTML(open('https://' + URI.parse(url).hostname + p,
+                'User-Agent' => Dumper::USER_AGENT,
+                'Referer'    => url
+              )).at_xpath('//a[@class="original-file-unchanged"]/@href').text
               Dumper.get path, img, { referer: url }
             }
           }
