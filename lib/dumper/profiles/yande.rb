@@ -1,5 +1,5 @@
 #--
-# Copyright(C) 2013 Giovanni Capuano <webmaster@giovannicapuano.net>
+# Copyright(C) 2015 Giovanni Capuano <webmaster@giovannicapuano.net>
 #
 # This file is part of Dumper.
 #
@@ -27,7 +27,8 @@ module Dumper
 
           Nokogiri::HTML(open("#{url}&page=#{i}", 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).xpath('//a[@class="thumb"]/@href').each { |p|
             @pool.process {
-              img = Nokogiri::HTML(open("https://yande.re#{p}", 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).at_xpath('//img[@id="image"]/@src').text
+              img_url = 'https://' + URI.parse(url).hostname + p
+              img     = Nokogiri::HTML(open(img_url, 'User-Agent' => Dumper::USER_AGENT, 'Referer' => url)).at_xpath('//img[@id="image"]/@src').text
               Dumper.get path, img, { referer: url }
             }
           }
