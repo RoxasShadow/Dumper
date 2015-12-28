@@ -8,7 +8,7 @@ Gem::Specification.new { |s|
   s.homepage      = 'https://github.com/RoxasShadow'
   s.summary       = 'Fetch and download image gallery.'
   s.description   = 'A dumper to download whole galleries from board like 4chan, imagebam, mangaeden, deviantart, etc.'
-  s.licenses      = 'GPL-3'
+  s.licenses      = 'GPL-3.0'
 
   s.require_paths = ['lib']
   s.files         = Dir.glob('lib/**/*.rb')
