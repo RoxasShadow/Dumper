@@ -1,5 +1,5 @@
 #--
-# Copyright(C) 2015 Giovanni Capuano <webmaster@giovannicapuano.net>
+# Copyright(C) 2018 Giovanni Capuano <webmaster@giovannicapuano.net>
 #
 # This file is part of Dumper.
 #
@@ -19,6 +19,6 @@
 
 module Dumper
   def self.version
-    '0.8.3'
+    '0.8.4'
   end
 end

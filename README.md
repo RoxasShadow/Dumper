@@ -34,6 +34,6 @@ Examples
 
 `$ dumper --url "http://www.mangaeden.com/en-manga/nisekoi" --path nisekoi --from 3  --to 9`
 
-`$ dumper --url "http://www.mangaeden.com/en-manga/nisekoi" --path nisekoi --from 10 --to 10 --output nisekoi.log`
+`$ dumper --url "http://www.mangaeden.com/en-manga/nisekoi" --path nisekoi --from 10 --to 10 --output nisekoi.log --profile mangaeden`
 
 `$ dumper --file stuff.txt --silence # dump all the lines formatted in the "URL||PATH" way`

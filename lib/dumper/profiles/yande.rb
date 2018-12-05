@@ -30,7 +30,7 @@ module Dumper
               img = Nokogiri::HTML(open('https://' + URI.parse(url).hostname + p,
                 'User-Agent' => Dumper::USER_AGENT,
                 'Referer'    => url
-              )).at_xpath('//a[@class="original-file-unchanged"]/@href').text
+              )).at_xpath('//a[@id="png" or @id="highres"]/@href').text
               Dumper.get path, img, { referer: url }
             }
           }
