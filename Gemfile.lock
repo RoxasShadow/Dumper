@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    image-dumper (0.8.3)
+    image-dumper (0.8.4)
       addressable (~> 2.3)
       alakazam (~> 0.4)
       certified (~> 1.0)

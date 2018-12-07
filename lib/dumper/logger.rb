@@ -45,10 +45,6 @@ module Dumper
       end
     end
 
-    def initialize
-      @@where = :screen
-    end
-
     def update(data)
       if @@where == :file
         Logger.log_on_file @@file, data
