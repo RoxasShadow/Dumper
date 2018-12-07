@@ -4,6 +4,8 @@ Dumper
 A dumper to download whole image galleries of the most popular boards (aka, those I care).
 It's modular, so you can add a website just putting its module in lib/dumper/profiles.
 
+If you wish to use a graphical user interface, you can use [DumperUI](https://github.com/RoxasShadow/DumperUI).
+
 Install
 -------
 
